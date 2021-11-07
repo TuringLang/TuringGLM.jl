@@ -13,12 +13,7 @@ makedocs(;
         canonical="https://TuringLang.github.io/TuringGLM.jl",
         assets=String[],
     ),
-    pages=[
-        "Home" => "index.md",
-    ],
+    pages=["Home" => "index.md"],
 )
 
-deploydocs(;
-    repo="github.com/TuringLang/TuringGLM.jl",
-    devbranch="main",
-)
+deploydocs(; repo="github.com/TuringLang/TuringGLM.jl", devbranch="main")
