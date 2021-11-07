@@ -3,11 +3,24 @@ uuid = "0004c1f4-53c5-4d43-a221-a1dac6cf6b74"
 authors = ["Jose Storopoli <thestoropoli@gmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
+CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
+GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+StatsModels = "3eaba693-59b7-5ba5-a881-562e759f1c8d"
+Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
+
 [compat]
+CategoricalArrays = "0.10"
+GLM = "1.5"
+Reexport = "1.2"
+StatsModels = "0.6"
+Turing = "0.19"
 julia = "1.6"
 
 [extras]
+CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test"]
+test = ["Test", "CategoricalArrays"]
