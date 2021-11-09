@@ -1,7 +1,7 @@
 using Tables
 using Statistics: mean
-using StatsModels:
-    @formula, hasintercept, modelcols, FormulaTerm, apply_schema, schema, coefnames
+using StatsModels: FormulaTerm
+using StatsModels: apply_schema, hasintercept, modelcols, schema
 
 """
     center_predictors(X::AbstractMatrix)
