@@ -7,6 +7,7 @@ using StatsModels:
     center_predictors(X::AbstractMatrix)
 
 Centers the columns of a matrix `X` of predictors.
+
 Returns a tuple with:
 1. `μ_X`: 1xK `Matrix` of `Float64`s of the means of the K columns in the original `X`
 matrix.
