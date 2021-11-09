@@ -45,7 +45,7 @@ Returns a tuple with:
 function make_yX(formula::FormulaTerm, data::D) where {D}
     Tables.istable(data) || throw(ArgumentError("Data of type $D is not a table!"))
     ts = apply_schema(formula, schema(data))
-    y, X = modelcols(ts, df)
+    y, X = modelcols(ts, data)
     if hasintercept(formula)
         X = X[:, 2:end]
     end

@@ -20,7 +20,7 @@ nt_cat = (;
     y_int=[2, 3, 4, 5],
 )
 
-df_str = (;
+df_str = DataFrame(;
     x_float=[1.1, 2.3, 3.14, 3.65],
     x_int=[1, 2, 3, 4],
     x_cat=["1", "2", "3", "4"],
@@ -28,7 +28,7 @@ df_str = (;
     y_int=[2, 3, 4, 5],
 )
 
-df_cat = DataFrames(;
+df_cat = DataFrame(;
     x_float=[1.1, 2.3, 3.14, 3.65],
     x_int=[1, 2, 3, 4],
     x_cat=categorical([1, 2, 3, 4]),
@@ -37,10 +37,7 @@ df_cat = DataFrames(;
     y_int=[2, 3, 4, 5],
 )
 
-my_tests = ["formula.jl"]
 
 @testset "TuringGLM.jl" begin
-    for test in my_tests
-        include(test)
-    end
+    include("formula.jl")
 end
