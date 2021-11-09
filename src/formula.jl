@@ -19,23 +19,20 @@ variables.
 
 # Examples
 ```jldoctest
-julia> X = rand(3, 2)
-3×2 Matrix{Float64}:
- 0.291245   0.604541
- 0.0960436  0.609567
- 0.536451   0.0184553
+julia> X = [12 -13;
+            10 10;
+            -12 13]
 
 julia> μ_X, X_centered = center_predictors(X);
 
-julia> μ_X
 1×2 Matrix{Float64}:
- 0.307913  0.410854
+ 3.33333  3.33333
 
 julia> X_centered
 3×2 Matrix{Float64}:
- -0.0166683   0.193686
- -0.21187     0.198713
-  0.228538   -0.392399
+   8.66667  -16.3333
+   6.66667    6.66667
+ -15.3333     9.66667
 ```
 """
 function center_predictors(X::AbstractMatrix)

@@ -4,6 +4,7 @@
 /Manifest.toml
 /test/Manifest.toml
 /docs/build/
+/docs/Manifest.toml
 
 .vscode/
 .DS_Store
