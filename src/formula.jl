@@ -60,10 +60,7 @@ Returns a tuple with:
 
 # Arguments
 - `formula`: a `FormulaTerm` created by `StatsModels.@formula` macro.
-- `data`: `data` can either be a whole table (a property-accessible collection of iterable
-columns or iterable collection of property-accessible rows, as defined by
-[Tables.jl](https://github.com/JuliaData/Tables.jl), which includes `DataFrame`s) or a
-single row (in the form of a `NamedTuple` of scalar values).
+- `data`:  a `data` object that satisfies the [Tables.jl](https://github.com/JuliaData/Tables.jl) interface such as a DataFrame.
 
 # Examples
 ```jldoctest
