@@ -37,7 +37,6 @@ df_cat = DataFrame(;
     y_int=[2, 3, 4, 5],
 )
 
-
 @testset "TuringGLM.jl" begin
     include("formula.jl")
 end
