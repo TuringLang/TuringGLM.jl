@@ -40,7 +40,8 @@ Returns a tuple with:
 
 # Arguments
 - `formula`: a `FormulaTerm` created by `StatsModels.@formula` macro.
-- `data`:  a `data` object that satisfies the [Tables.jl](https://github.com/JuliaData/Tables.jl) interface such as a DataFrame.
+- `data`:  a `data` object that satisfies the
+[Tables.jl](https://github.com/JuliaData/Tables.jl) interface such as a DataFrame.
 """
 function make_yX(formula::FormulaTerm, data::D) where {D}
     Tables.istable(data) || throw(ArgumentError("Data of type $D is not a table!"))
