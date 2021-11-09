@@ -16,26 +16,6 @@ matrix.
 # Arguments
 - `X::AbstractMatrix`: a matrix of predictors where rows are observations and columns are
 variables.
-
-# Examples
-```jldoctest
-julia> using TuringGLM
-
-julia> X = [12 -13;
-            10 10;
-            -12 13];
-
-julia> μ_X, X_centered = TuringGLM.center_predictors(X);
-
-1×2 Matrix{Float64}:
- 3.33333  3.33333
-
-julia> X_centered
-3×2 Matrix{Float64}:
-   8.66667  -16.3333
-   6.66667    6.66667
- -15.3333     9.66667
-```
 """
 function center_predictors(X::AbstractMatrix)
     μ_X = mapslices(mean, X; dims=1)
@@ -61,49 +41,6 @@ Returns a tuple with:
 # Arguments
 - `formula`: a `FormulaTerm` created by `StatsModels.@formula` macro.
 - `data`:  a `data` object that satisfies the [Tables.jl](https://github.com/JuliaData/Tables.jl) interface such as a DataFrame.
-
-# Examples
-```jldoctest
-julia> using TuringGLM
-
-julia> using CategoricalArrays
-
-julia> using DataFrames
-
-julia> df = DataFrame(;
-           y_int=[2, 3, 4, 5],
-           x_float=[1.1, 2.3, 3.14, 3.65],
-           x_cat=categorical([1, 2, 3, 4]),
-       )
-4×3 DataFrame
- Row │ y_int  x_float  x_cat
-     │ Int64  Float64  Cat…
-─────┼───────────────────────
-   1 │     2     1.1   1
-   2 │     3     2.3   2
-   3 │     4     3.14  3
-   4 │     5     3.65  4
-
-
-julia> formula = @formula y_int ~ 1 + x_float + x_cat;
-
-julia> y, X = TuringGLM.make_yX(formula, df)
-([2, 3, 4, 5], [1.1 0.0 0.0 0.0; 2.3 1.0 0.0 0.0; 3.14 0.0 1.0 0.0; 3.65 0.0 0.0 1.0])
-
-julia> y
-4-element Vector{Int64}:
- 2
- 3
- 4
- 5
-
-julia> X
-4×4 Matrix{Float64}:
- 1.1   0.0  0.0  0.0
- 2.3   1.0  0.0  0.0
- 3.14  0.0  1.0  0.0
- 3.65  0.0  0.0  1.0
-```
 """
 function make_yX(formula::FormulaTerm, data::D) where {D}
     Tables.istable(data) || throw(ArgumentError("Data of type $D is not a table!"))
