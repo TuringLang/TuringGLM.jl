@@ -53,4 +53,3 @@ function make_yX(formula::FormulaTerm, data::D) where {D}
     end
     return y, X
 end
-
