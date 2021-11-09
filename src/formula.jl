@@ -19,11 +19,13 @@ variables.
 
 # Examples
 ```jldoctest
+julia> using TuringGLM
+
 julia> X = [12 -13;
             10 10;
-            -12 13]
+            -12 13];
 
-julia> μ_X, X_centered = center_predictors(X);
+julia> μ_X, X_centered = TuringGLM.center_predictors(X);
 
 1×2 Matrix{Float64}:
  3.33333  3.33333
@@ -65,6 +67,8 @@ single row (in the form of a `NamedTuple` of scalar values).
 
 # Examples
 ```jldoctest
+julia> using TuringGLM
+
 julia> using CategoricalArrays
 
 julia> using DataFrames
@@ -86,7 +90,7 @@ julia> df = DataFrame(;
 
 julia> formula = @formula y_int ~ 1 + x_float + x_cat;
 
-julia> y, X = make_yX(formula, df)
+julia> y, X = TuringGLM.make_yX(formula, df)
 ([2, 3, 4, 5], [1.1 0.0 0.0 0.0; 2.3 1.0 0.0 0.0; 3.14 0.0 1.0 0.0; 3.65 0.0 0.0 1.0])
 
 julia> y
