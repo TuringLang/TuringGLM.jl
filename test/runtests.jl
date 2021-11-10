@@ -2,6 +2,7 @@ using TuringGLM
 using Test
 using DataFrames
 using CategoricalArrays: categorical
+using Statistics: mean, std
 
 nt_str = (;
     x_float=[1.1, 2.3, 3.14, 3.65],
