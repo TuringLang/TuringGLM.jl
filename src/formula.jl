@@ -1,8 +1,3 @@
-using Tables
-using Statistics: mean, std
-using StatsModels: FormulaTerm
-using StatsModels: apply_schema, hasintercept, modelcols, schema
-
 """
     center_predictors(X::AbstractMatrix)
 
@@ -71,11 +66,11 @@ Returns a tuple with:
 - `data`:  a `data` object that satisfies the
 [Tables.jl](https://github.com/JuliaData/Tables.jl) interface such as a DataFrame.
 """
-function make_yX(formula::FormulaTerm, data::D) where {D}
+function make_yX(formula::StatsModels.FormulaTerm, data::D) where {D}
     Tables.istable(data) || throw(ArgumentError("Data of type $D is not a table!"))
-    ts = apply_schema(formula, schema(data))
-    y, X = modelcols(ts, data)
-    if hasintercept(formula)
+    ts = StatsModels.apply_schema(formula, StatsModels.schema(data))
+    y, X = StatsModels.modelcols(ts, data)
+    if StatsModels.hasintercept(formula)
         X = X[:, 2:end]
     end
     return y, X
