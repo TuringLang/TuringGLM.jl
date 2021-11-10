@@ -96,10 +96,10 @@
     f = @formula(y_int ~ 1 + x_float + x_cat)
     y, X = TuringGLM.make_yX(f, nt_str)
     μ_X, X_centered = TuringGLM.center_predictors(X)
-    @test μ_X == [2.5475 0.25 0.25 0.25]
+    @test μ_X ≈ [2.5475 0.25 0.25 0.25]
     @test X_centered ≈ [
-        -1.44750 -0.25 -0.25 -0.25
-        -0.24750 0.75 -0.25 -0.25
+        -1.4475 -0.25 -0.25 -0.25
+        -0.2475 0.75 -0.25 -0.25
         0.5925 -0.25 0.75 -0.25
         1.1025 -0.25 -0.25 0.75
     ]
@@ -107,11 +107,38 @@
     # DataFrames
     y, X = TuringGLM.make_yX(f, df_str)
     μ_X, X_centered = TuringGLM.center_predictors(X)
-    @test μ_X == [2.5475 0.25 0.25 0.25]
+    @test μ_X ≈ [2.5475 0.25 0.25 0.25]
     @test X_centered ≈ [
-        -1.44750 -0.25 -0.25 -0.25
-        -0.24750 0.75 -0.25 -0.25
+        -1.4475 -0.25 -0.25 -0.25
+        -0.2475 0.75 -0.25 -0.25
         0.5925 -0.25 0.75 -0.25
         1.1025 -0.25 -0.25 0.75
+    ]
+
+    # standardize_predictors
+    # NamedTuples
+    f = @formula(y_int ~ 1 + x_float + x_cat)
+    y, X = TuringGLM.make_yX(f, nt_str)
+    μ_X, σ_X, X_std = TuringGLM.standardize_predictors(X)
+    @test μ_X ≈ [2.5475 0.25 0.25 0.25]
+    @test σ_X ≈ [1.114013 0.5 0.5 0.5]
+    @test X_std ≈ [
+        -1.29935645 -0.5 -0.5 -0.5
+        -0.222169756 1.5 -0.5 -0.5
+        0.53186093 -0.5 1.5 -0.5
+        0.98966527 -0.5 -0.5 1.5
+    ]
+
+    # DataFrames
+    y, X = TuringGLM.make_yX(f, df_str)
+    μ_X, X_centered = TuringGLM.center_predictors(X)
+    μ_X, σ_X, X_std = TuringGLM.standardize_predictors(X)
+    @test μ_X ≈ [2.5475 0.25 0.25 0.25]
+    @test σ_X ≈ [1.114013 0.5 0.5 0.5]
+    @test X_std ≈ [
+        -1.29935645 -0.5 -0.5 -0.5
+        -0.222169756 1.5 -0.5 -0.5
+        0.53186093 -0.5 1.5 -0.5
+        0.98966527 -0.5 -0.5 1.5
     ]
 end
