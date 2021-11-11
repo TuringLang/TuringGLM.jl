@@ -39,5 +39,11 @@ df_cat = DataFrame(;
 )
 
 @testset "TuringGLM.jl" begin
-    include("formula.jl")
+    # include("utils.jl")
+    # include("contrasts.jl")
+    # include("formula.jl")
+    # include("terms.jl")
+    # include("error_messages.jl")
+    # include("schema.jl")
+    # include("data_constructors.jl")
 end
