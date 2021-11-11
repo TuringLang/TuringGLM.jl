@@ -1,2 +1,1 @@
-@testset "contrats" begin
-end
+@testset "contrats" begin end

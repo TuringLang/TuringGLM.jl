@@ -35,8 +35,6 @@ function data_fixed_effects(formula::FormulaTerm, data::D) where {D}
     return nothing
 end
 
-
-
 """
     data_random_effects(formula::FormulaTerm, data)
 
@@ -57,5 +55,5 @@ function data_random_effects(formula::FormulaTerm, data::D) where {D}
 end
 
 function _has_ranef(formula::FormulaTerm, data)
-    return false 
+    return false
 end

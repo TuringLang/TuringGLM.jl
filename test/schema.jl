@@ -1,2 +1,1 @@
-@testset "schema" begin
-end
+@testset "schema" begin end

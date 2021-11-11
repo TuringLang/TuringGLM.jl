@@ -1,9 +1,9 @@
 module TuringGLM
 
 using Statistics: mean, std
-import DataAPI
-import Tables
-import TableOperations
+using DataAPI: DataAPI
+using Tables: Tables
+using TableOperations: TableOperations
 
 using Reexport: @reexport
 

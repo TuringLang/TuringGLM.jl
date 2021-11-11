@@ -20,7 +20,7 @@ function checkcol(table, name::Symbol)
     i = Tables.columnindex(table, name)
     if i == 0 # if no such column
         names = Tables.columnnames(table)
-        nearestnames = join(fuzzymatch(names, name),", " )
+        nearestnames = join(fuzzymatch(names, name), ", ")
         return "There isn't a variable called '$name' in your data; the nearest names appear to be: $nearestnames"
     end
 
@@ -37,8 +37,8 @@ Check that each name in the given model `f` exists in the data source `t` and re
 `t` is something that implements the `Tables` interface.
 """
 function checknamesexist(f::FormulaTerm, t)
-    if ! Tables.istable(t)
-        throw(ArgumentError( "$(typeof(t)) isn't a valid Table type" ))
+    if !Tables.istable(t)
+        throw(ArgumentError("$(typeof(t)) isn't a valid Table type"))
     end
     # TODO: termvars in in schema.jl
     for n in termvars(f)
@@ -46,6 +46,6 @@ function checknamesexist(f::FormulaTerm, t)
         if msg != ""
             return msg
         end
-    end    
+    end
     return ""
 end

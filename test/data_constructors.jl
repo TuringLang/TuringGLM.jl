@@ -101,6 +101,5 @@
             3.65 0.0 0.0 1.0
         ]
     end
-    @testset "data_random_effects" begin
-    end
+    @testset "data_random_effects" begin end
 end
