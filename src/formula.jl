@@ -50,28 +50,63 @@ function standardize_predictors(X::AbstractMatrix)
 end
 
 """
-    make_yX(formula::FormulaTerm, data)
+    model_response(formula::StatsModels.FormulaTerm, data)
 
-Constructs the response y vector and the matrix X of predictors.
+Constructs the response y vector.
+
+Returns a `Vector` of the response variable in the `formula` and present inside `data`.
+# Arguments
+- `formula`: a `FormulaTerm` created by `StatsModels.@formula` macro.
+- `data`:  a `data` object that satisfies the
+[Tables.jl](https://github.com/JuliaData/Tables.jl) interface such as a DataFrame.
+"""
+function model_response(formula::StatsModels.FormulaTerm, data::D) where {D}
+    Tables.istable(data) || throw(ArgumentError("Data of type $D is not a table!"))
+    ts = StatsModels.apply_schema(
+        formula, StatsModels.schema(data), MixedModels.LinearMixedModel
+    )
+    y = first(StatsModels.modelcols(ts, data))
+    return y
+end
+
+"""
+    model_matrix(formula::StatsModels.FormulaTerm, data)
+
+Constructs the matrix X of predictors along with the matrix Z of random effects
+(if applicable).
 
 Note that the original `StatsModels.jl` implementation adds an intercept column filled
 with `1`s, which we do not.
 
-Returns a tuple with:
-1. `y`: A `Vector` of the response variable in the `formula` and present inside `data`.
-2. `X`: A `Matrix` of the predictors variables in the `formula` and present inside `data`.
+Returns a`NamedTuple` with:
+1. `X`: A `Matrix` of the predictors variables in the `formula` and present inside `data`.
+2. `Zs`: One or more random effects matrix (if applicable, otherwise `Zs` is `nothing`).
 
 # Arguments
 - `formula`: a `FormulaTerm` created by `StatsModels.@formula` macro.
 - `data`:  a `data` object that satisfies the
 [Tables.jl](https://github.com/JuliaData/Tables.jl) interface such as a DataFrame.
 """
-function make_yX(formula::StatsModels.FormulaTerm, data::D) where {D}
+function model_matrix(formula::StatsModels.FormulaTerm, data::D) where {D}
     Tables.istable(data) || throw(ArgumentError("Data of type $D is not a table!"))
-    ts = StatsModels.apply_schema(formula, StatsModels.schema(data))
-    y, X = StatsModels.modelcols(ts, data)
+    ts = StatsModels.apply_schema(formula, StatsModels.schema(data), MixedModels.MixedModel)
+    if _has_ranef(ts, data)
+        _, Xs = StatsModels.modelcols(ts, data)
+        X = first(Xs)
+        Zs = last(Xs)
+    elseif !(_has_ranef(ts, data))
+        _, X = StatsModels.modelcols(ts, data)
+        Zs = nothing
+    end
     if StatsModels.hasintercept(formula)
         X = X[:, 2:end]
     end
-    return y, X
+    return (; X, Zs)
+end
+
+# I have no idea how to test if a `formula` has MixedModels.RandomEffectsTerms.
+# So this is a hack, if the return value from `modelmatrix` is a Tuple
+# (hence not an AbstractMatrix), we know that we have a RandomEffectsTerms in our hands.
+function _has_ranef(formula::StatsModels.FormulaTerm, data)
+    return !(MixedModels.modelmatrix(formula, data) isa AbstractMatrix)
 end

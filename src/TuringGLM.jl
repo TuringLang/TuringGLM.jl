@@ -2,9 +2,9 @@ module TuringGLM
 
 using Statistics: mean, std
 
-import Tables
-import MixedModels
-import StatsModels
+using Tables: Tables
+using MixedModels: MixedModels
+using StatsModels: StatsModels
 
 using Reexport: @reexport
 
