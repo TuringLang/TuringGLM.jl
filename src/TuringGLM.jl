@@ -2,6 +2,7 @@ module TuringGLM
 
 using Statistics: mean, std
 using DataAPI: DataAPI
+using StatsBase: StatsBase
 using Tables: Tables
 using TableOperations: TableOperations
 

@@ -165,6 +165,29 @@ end
 baselevel(c::DummyCoding) = c.base
 DataAPI.levels(c::DummyCoding) = c.levels
 
+"""
+    FullDummyCoding()
+
+Full-rank dummy coding generates one indicator (1 or 0) column for each level,
+**including** the base level. This is sometimes known as 
+[one-hot encoding](https://en.wikipedia.org/wiki/One-hot).
+
+Needed internally for some situations where a categorical variable with ``k``
+levels needs to be converted into ``k`` model matrix columns instead of the
+standard ``k-1``.
+"""
+mutable struct FullDummyCoding <: AbstractContrasts
+# Dummy contrasts have no base level (since all levels produce a column)
+end
+
+ContrastsMatrix(C::FullDummyCoding, levels::AbstractVector{T}) where {T} =
+    ContrastsMatrix(Matrix(1.0I, length(levels), length(levels)), levels, levels, C)
+
+"Promote contrasts matrix to full rank version"
+Base.convert(::Type{ContrastsMatrix{FullDummyCoding}}, C::ContrastsMatrix) =
+    ContrastsMatrix(FullDummyCoding(), C.levels)
+
+
 # fallback method for other types that might not have base or level fields
 baselevel(c::AbstractContrasts) = nothing
 DataAPI.levels(c::AbstractContrasts) = nothing
