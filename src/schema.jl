@@ -259,16 +259,15 @@ function apply_schema(t::CategoricalTerm, schema::FullRank, context::AbstractTer
     new_contrasts = ContrastsMatrix(FullDummyCoding(), t.contrasts.levels)
     t = CategoricalTerm(t.sym, new_contrasts)
     @debug "  aliased term absent, repairing: $t"
-    t
+    return t
 end
 
 drop_term(from::FormulaTerm, to) = FormulaTerm(from.lhs, drop_term(from.rhs, to))
 drop_term(from::MatrixTerm, to) = MatrixTerm(drop_term(from.terms, to))
-drop_term(from::TupleTerm, to) =
-    tuple((t for t = from if !symequal(t, to))...)
+drop_term(from::TupleTerm, to) = tuple((t for t = from if !symequal(t, to))...)
 function drop_term(from::InteractionTerm, t)
     terms = drop_term(from.terms, t)
-    length(terms) > 1 ? InteractionTerm(terms) : terms[1]
+    return length(terms) > 1 ? InteractionTerm(terms) : terms[1]
 end
 
 """
@@ -280,11 +279,10 @@ standard (reduced rank) or full rank contrasts, based on the context it occurs
 in and the other terms that have already been encountered.
 """
 termsyms(t::AbstractTerm) = Set()
-termsyms(t::Union{Term, CategoricalTerm, ContinuousTerm}) = Set([t.sym])
+termsyms(t::Union{Term,CategoricalTerm,ContinuousTerm}) = Set([t.sym])
 termsyms(t::InteractionTerm) = mapreduce(termsyms, union, t.terms)
 
 symequal(t1::AbstractTerm, t2::AbstractTerm) = issetequal(termsyms(t1), termsyms(t2))
-
 
 """
     termvars(t::AbstractTerm)
@@ -292,8 +290,8 @@ symequal(t1::AbstractTerm, t2::AbstractTerm) = issetequal(termsyms(t1), termsyms
 The data variables that this term refers to.
 """
 termvars(::AbstractTerm) = Symbol[]
-termvars(t::Union{Term, CategoricalTerm, ContinuousTerm}) = [t.sym]
+termvars(t::Union{Term,CategoricalTerm,ContinuousTerm}) = [t.sym]
 termvars(t::InteractionTerm) = mapreduce(termvars, union, t.terms)
-termvars(t::TupleTerm) = mapreduce(termvars, union, t, init=Symbol[])
+termvars(t::TupleTerm) = mapreduce(termvars, union, t; init=Symbol[])
 termvars(t::MatrixTerm) = termvars(t.terms)
 termvars(t::FormulaTerm) = union(termvars(t.lhs), termvars(t.rhs))

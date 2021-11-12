@@ -177,16 +177,17 @@ levels needs to be converted into ``k`` model matrix columns instead of the
 standard ``k-1``.
 """
 mutable struct FullDummyCoding <: AbstractContrasts
-# Dummy contrasts have no base level (since all levels produce a column)
+    # Dummy contrasts have no base level (since all levels produce a column)
 end
 
-ContrastsMatrix(C::FullDummyCoding, levels::AbstractVector{T}) where {T} =
-    ContrastsMatrix(Matrix(1.0I, length(levels), length(levels)), levels, levels, C)
+function ContrastsMatrix(C::FullDummyCoding, levels::AbstractVector{T}) where {T}
+    return ContrastsMatrix(Matrix(1.0I, length(levels), length(levels)), levels, levels, C)
+end
 
 "Promote contrasts matrix to full rank version"
-Base.convert(::Type{ContrastsMatrix{FullDummyCoding}}, C::ContrastsMatrix) =
-    ContrastsMatrix(FullDummyCoding(), C.levels)
-
+function Base.convert(::Type{ContrastsMatrix{FullDummyCoding}}, C::ContrastsMatrix)
+    return ContrastsMatrix(FullDummyCoding(), C.levels)
+end
 
 # fallback method for other types that might not have base or level fields
 baselevel(c::AbstractContrasts) = nothing
