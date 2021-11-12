@@ -14,6 +14,7 @@ end
 
 """
     @formula(ex)
+
 Capture and parse a formula expression as a `Formula` struct.
 
 A formula is an abstract specification of a dependence between _left-hand_ and

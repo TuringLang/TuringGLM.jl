@@ -280,8 +280,8 @@ function coefnames(t::InteractionTerm)
     )
 end
 
-hasresponse(t) = false
-hasresponse(t::FormulaTerm) = t.lhs !== nothing
+has_response(t) = false
+has_response(t::FormulaTerm) = t.lhs !== nothing
 
 """
     term(x)

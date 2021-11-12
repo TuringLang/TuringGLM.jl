@@ -20,4 +20,6 @@ include("error_messages.jl")
 include("schema.jl")
 include("data_constructors.jl")
 
+export @formula
+
 end # module
