@@ -154,6 +154,23 @@ function Base.getindex(contrasts::ContrastsMatrix{C,T}, rowinds, colinds) where 
     return getindex(contrasts.matrix, getindex.(Ref(contrasts.invindex), rowinds), colinds)
 end
 
+"""
+    DummyCoding([base[, levels]])
+    DummyCoding(; base=nothing, levels=nothing)
+
+Dummy coding generates one indicator column (1 or 0) for each non-base level.
+
+If `levels` are omitted or `nothing`, they are determined from the data
+by calling the `levels` function on the data when constructing `ContrastsMatrix`.
+If `base` is omitted or `nothing`, the first level is used as the base.
+
+Columns have non-zero mean and are collinear with an intercept column (and
+lower-order columns for interactions) but are orthogonal to each other. In a
+regression model, dummy coding leads to an intercept that is the mean of the
+dependent variable for base level.
+
+Also known as "treatment coding" or "one-hot encoding".
+"""
 mutable struct DummyCoding <: AbstractContrasts
     base::Any
     levels::Union{AbstractVector,Nothing}
@@ -165,11 +182,15 @@ end
 baselevel(c::DummyCoding) = c.base
 DataAPI.levels(c::DummyCoding) = c.levels
 
+function contrasts_matrix(C::DummyCoding, baseind, n)
+    return Matrix(1.0I, n, n)[:, [1:(baseind - 1); (baseind + 1):n]]
+end
+
 """
     FullDummyCoding()
 
 Full-rank dummy coding generates one indicator (1 or 0) column for each level,
-**including** the base level. This is sometimes known as 
+**including** the base level. This is sometimes known as
 [one-hot encoding](https://en.wikipedia.org/wiki/One-hot).
 
 Needed internally for some situations where a categorical variable with ``k``

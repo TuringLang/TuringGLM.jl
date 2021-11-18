@@ -12,7 +12,9 @@ terms(t::MatrixTerm) = terms(t.terms)
 terms(t::TupleTerm) = mapreduce(terms, union, t)
 
 needs_schema(::AbstractTerm) = true
+needs_schema(::ConstantTerm) = false
 needs_schema(t) = false
+needs_schema(::Union{CategoricalTerm,ContinuousTerm,InterceptTerm}) = false
 
 """
     Schema
@@ -177,12 +179,22 @@ function apply_schema(t::Union{ContinuousTerm,CategoricalTerm}, schema::Schema)
 end
 apply_schema(t::MatrixTerm, sch::Schema) = MatrixTerm(apply_schema.(t.terms, Ref(sch)))
 
+function apply_schema(t::ConstantTerm, schema::Schema, Mod::Type)
+    t.n ∈ (-1, 0, 1) || throw(
+        ArgumentError(
+            "can't create InterceptTerm from $(t.n) " * "(only -1, 0, and 1 allowed)"
+        ),
+    )
+    return InterceptTerm{t.n == 1}()
+end
+
 """
     has_schema(t::T) where {T<:AbstractTerm}
 
 Return `true` if `t` has a schema, meaning that `apply_schema` would be a no-op.
 """
 has_schema(t::AbstractTerm) = true
+has_schema(t::ConstantTerm) = false
 has_schema(t::Term) = false
 has_schema(t::Union{ContinuousTerm,CategoricalTerm}) = true
 has_schema(t::InteractionTerm) = all(has_schema(tt) for tt in t.terms)
@@ -226,6 +238,13 @@ matrix would be produced, categorical terms should be "promoted" to full rank
 (where a categorical variable with ``k`` levels would produce ``k`` columns,
 instead of ``k-1`` in the standard contrast coding schemes).
 """
+function apply_schema(t::ConstantTerm, schema::FullRank, Mod::Type)
+    push!(schema.already, t)
+    return apply_schema(t, schema.schema, Mod)
+end
+
+apply_schema(t::InterceptTerm, schema::FullRank, Mod::Type) = (push!(schema.already, t); t)
+
 function apply_schema(t::AbstractTerm, schema::FullRank)
     push!(schema.already, t)
     t = apply_schema(t, schema.schema) # continuous or categorical now
@@ -262,6 +281,7 @@ function apply_schema(t::CategoricalTerm, schema::FullRank, context::AbstractTer
     return t
 end
 
+drop_term(from, to) = symequal(from, to) ? ConstantTerm(1) : from
 drop_term(from::FormulaTerm, to) = FormulaTerm(from.lhs, drop_term(from.rhs, to))
 drop_term(from::MatrixTerm, to) = MatrixTerm(drop_term(from.terms, to))
 drop_term(from::TupleTerm, to) = tuple((t for t = from if !symequal(t, to))...)
@@ -279,6 +299,8 @@ standard (reduced rank) or full rank contrasts, based on the context it occurs
 in and the other terms that have already been encountered.
 """
 termsyms(t::AbstractTerm) = Set()
+termsyms(t::InterceptTerm{true}) = Set(1)
+termsyms(t::ConstantTerm) = Set((t.n,))
 termsyms(t::Union{Term,CategoricalTerm,ContinuousTerm}) = Set([t.sym])
 termsyms(t::InteractionTerm) = mapreduce(termsyms, union, t.terms)
 

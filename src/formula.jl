@@ -31,21 +31,22 @@ Operators that have special interpretations in this syntax are
 
 * `~` is the formula separator, where it is a binary operator (the first
   argument is the left-hand side, and the second is the right-hand side.
-
 * `+` concatenates variables as columns when generating a model matrix.
-
 * `&` representes an _interaction_ between two or more variables, which
   corresponds to a row-wise kronecker product of the individual terms
   (or element-wise product if all terms involved are continuous/scalar).
-
 * `*` expands to all main effects and interactions: `a*b` is equivalent to
   `a+b+a&b`, `a*b*c` to `a+b+c+a&b+a&c+b&c+a&b&c`, etc.
+* `1`, `0`, and `-1` indicate the presence (for `1`) or absence (for `0` and
+  `-1`) of an intercept column.
 
 The rules that are applied are
 
 * The associative rule (un-nests nested calls to `+`, `&`, and `*`).
 * The distributive rule (interactions `&` distribute over concatenation `+`).
 * The `*` rule expands `a*b` to `a+b+a&b` (recursively).
+* Subtraction is converted to addition and negation, so `x-1` becomes `x + -1`
+  (applies only to subtraction of literal 1).
 * Single-argument `&` calls are stripped, so `&(x)` becomes the main effect `x`.
 """
 macro formula(ex)
@@ -196,6 +197,7 @@ end
 # generate Term expressions for symbols
 terms!(::Nothing) = :(nothing)
 terms!(s::Symbol) = :(Term($(Meta.quot(s))))
+terms!(n::Number) = :(ConstantTerm($n))
 function terms!(ex::Expr)
     if ex.args[1] ∈ SPECIALS
         ex.args[1] = esc(ex.args[1])
