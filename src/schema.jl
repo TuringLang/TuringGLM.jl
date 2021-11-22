@@ -146,7 +146,7 @@ function concrete_term(t::Term, xs::AbstractArray, ::Type{CategoricalTerm})
 end
 
 function concrete_term(t::Term, xs::AbstractArray, contrasts::AbstractContrasts)
-    contrmat = ContrastsMatrix(contrasts, intersect(levels(xs), unique(xs)))
+    contrmat = ContrastsMatrix(contrasts, intersect(DataAPI.levels(xs), unique(xs)))
     return CategoricalTerm(t.sym, contrmat)
 end
 

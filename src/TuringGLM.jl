@@ -1,7 +1,9 @@
 module TuringGLM
 
-using Statistics: mean, std
+using Statistics: mean, std, var
 using DataAPI: DataAPI
+using LinearAlgebra: I
+using REPL: levenshtein
 using StatsBase: StatsBase
 using Tables: Tables
 using TableOperations: TableOperations
