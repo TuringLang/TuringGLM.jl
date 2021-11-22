@@ -43,7 +43,7 @@ df_cat = DataFrame(;
     include("formula.jl")
     include("terms.jl")
     include("schema.jl")
+    include("error_messages.jl")
     # include("contrasts.jl")
-    # include("error_messages.jl")
     # include("data_constructors.jl")
 end
