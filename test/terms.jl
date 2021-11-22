@@ -9,7 +9,14 @@ mimestring(x) = mimestring(MIME"text/plain", x)
     using TuringGLM:
         apply_schema, concrete_term, hasresponse, hasintercept, omitsintercept, schema, term
     using TuringGLM: ContrastsMatrix, DummyCoding, FullDummyCoding
-    using TuringGLM: ContinuousTerm, FormulaTerm, InteractionTerm, InterceptTerm, TermOrTerms, TupleTerm, Term
+    using TuringGLM:
+        ContinuousTerm,
+        FormulaTerm,
+        InteractionTerm,
+        InterceptTerm,
+        TermOrTerms,
+        TupleTerm,
+        Term
 
     @testset "concrete_term" begin
         t = term(:aaa)
@@ -150,9 +157,9 @@ mimestring(x) = mimestring(MIME"text/plain", x)
         # TermOrTerms - one or more AbstractTerms (if more, a tuple)
         # empty tuples are never terms
         @test !(() isa TermOrTerms)
-        @test (a, ) isa TermOrTerms
+        @test (a,) isa TermOrTerms
         @test (a, b) isa TermOrTerms
-        @test (a, b, a&b) isa TermOrTerms
+        @test (a, b, a & b) isa TermOrTerms
         @test !(((), a) isa TermOrTerms)
         # can't contain further tuples
         @test !((a, (a,), b) isa TermOrTerms)
@@ -160,9 +167,9 @@ mimestring(x) = mimestring(MIME"text/plain", x)
         # a tuple of AbstractTerms OR Tuples of one or more terms
         # empty tuples are never terms
         @test !(() isa TupleTerm)
-        @test (a, ) isa TupleTerm
+        @test (a,) isa TupleTerm
         @test (a, b) isa TupleTerm
-        @test (a, b, a&b) isa TupleTerm
+        @test (a, b, a & b) isa TupleTerm
         @test !(((), a) isa TupleTerm)
         @test (((a,), a) isa TupleTerm)
 
@@ -181,9 +188,8 @@ mimestring(x) = mimestring(MIME"text/plain", x)
     end
 
     @testset "concrete_term error messages" begin
-        t = (a = [1, 2, 3], b = [0.0, 0.5, 1.0])
+        t = (a=[1, 2, 3], b=[0.0, 0.5, 1.0])
         @test Tables.istable(t)
-        @test_throws ArgumentError concrete_term(term(:not_there), t )
+        @test_throws ArgumentError concrete_term(term(:not_there), t)
     end
 end
-
