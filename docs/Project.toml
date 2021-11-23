@@ -1,3 +1,6 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 TuringGLM = "0004c1f4-53c5-4d43-a221-a1dac6cf6b74"
+
+[compat]
+Documenter = "0.27"
