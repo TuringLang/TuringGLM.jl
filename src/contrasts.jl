@@ -19,7 +19,7 @@ end
 
 """
     Base.:(==)
-    
+
 Only check equality of matrix, termnames, and levels, and that the type is the
 same for the contrasts (values are irrelevant).  This ensures that the two
 will behave identically in creating modelmatrix columns.
@@ -127,8 +127,8 @@ function ContrastsMatrix(
 end
 
 function ContrastsMatrix(c::Type{<:AbstractContrasts}, levels::AbstractVector)
-    msg = "contrast types must be instantiated (use $c() instead of $c)")
-    throw(ArgumentError(msg))
+    msg = "contrast types must be instantiated (use $c() instead of $c)"
+    return throw(ArgumentError(msg))
 end
 
 # given an existing ContrastsMatrix, check that all passed levels are present
