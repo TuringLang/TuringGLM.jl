@@ -177,10 +177,10 @@ Also known as "treatment coding" or "one-hot encoding".
 mutable struct DummyCoding <: AbstractContrasts
     base::Any
     levels::Union{AbstractVector,Nothing}
-end
-## constructor with optional keyword arguments, defaulting to nothing
-function DummyCoding(; base=nothing, levels::Union{AbstractVector,Nothing}=nothing)
-    return DummyCoding(base, levels)
+    # constructor with optional keyword arguments, defaulting to nothing
+    function DummyCoding(; base=nothing, levels::Union{AbstractVector,Nothing}=nothing)
+        return new(base, levels)
+    end
 end
 baselevel(c::DummyCoding) = c.base
 DataAPI.levels(c::DummyCoding) = c.levels

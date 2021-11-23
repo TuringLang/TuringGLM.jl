@@ -15,7 +15,7 @@ nt_cat = (;
     x_float,
     x_int,
     x_cat=categorical(x_int),
-    x_cat_ordered=categorical([x_int]; ordered=true),
+    x_cat_ordered=categorical(x_int; ordered=true),
     y_float,
     y_int,
 )
