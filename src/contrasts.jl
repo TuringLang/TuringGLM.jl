@@ -17,9 +17,13 @@ struct ContrastsMatrix{C<:AbstractContrasts,T,U}
     end
 end
 
-# only check equality of matrix, termnames, and levels, and that the type is the
-# same for the contrasts (values are irrelevant).  This ensures that the two
-# will behave identically in creating modelmatrix columns
+"""
+    Base.:(==)
+    
+Only check equality of matrix, termnames, and levels, and that the type is the
+same for the contrasts (values are irrelevant).  This ensures that the two
+will behave identically in creating modelmatrix columns.
+"""
 function Base.:(==)(
     a::ContrastsMatrix{C,T}, b::ContrastsMatrix{C,T}
 ) where {C<:AbstractContrasts,T}
@@ -31,6 +35,9 @@ function Base.hash(a::ContrastsMatrix{C}, h::UInt) where {C}
 end
 
 """
+    ContrastsMatrix(contrasts::AbstractContrasts, levels::AbstractVector)
+    ContrastsMatrix(contrasts_matrix::ContrastsMatrix, levels::AbstractVector)
+
 An instantiation of a contrast coding system for particular levels
 
 This type is used internally for generating model matrices based on categorical
@@ -94,11 +101,8 @@ function ContrastsMatrix(
 
     n = length(c_levels)
     if n == 0
-        throw(
-            ArgumentError(
-                "empty set of levels found (need at least two to compute " * "contrasts)."
-            ),
-        )
+        msg = "empty set of levels found (need at least two to compute " * "contrasts)."
+        throw(ArgumentError(msg))
     elseif n == 1
         throw(
             ArgumentError(
@@ -123,9 +127,8 @@ function ContrastsMatrix(
 end
 
 function ContrastsMatrix(c::Type{<:AbstractContrasts}, levels::AbstractVector)
-    return throw(
-        ArgumentError("contrast types must be instantiated (use $c() instead of $c)")
-    )
+    msg = "contrast types must be instantiated (use $c() instead of $c)")
+    throw(ArgumentError(msg))
 end
 
 # given an existing ContrastsMatrix, check that all passed levels are present
@@ -197,7 +200,7 @@ Needed internally for some situations where a categorical variable with ``k``
 levels needs to be converted into ``k`` model matrix columns instead of the
 standard ``k-1``.
 """
-mutable struct FullDummyCoding <: AbstractContrasts
+struct FullDummyCoding <: AbstractContrasts
     # Dummy contrasts have no base level (since all levels produce a column)
 end
 

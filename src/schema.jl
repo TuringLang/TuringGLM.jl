@@ -60,7 +60,7 @@ the appropriate term type will be guessed based on the data type from the data c
 numeric data is assumed to be continuous, and any non-numeric data is assumed to be
 categorical.
 
-Returns a [`TuringGLM.Schema`](@ref), which is a wrapper around a `Dict` mapping `Term`s to
+Return a [`TuringGLM.Schema`](@ref), which is a wrapper around a `Dict` mapping `Term`s to
 their concrete instantiations (`ContinuousTerm` or `CategoricalTerm`).
 """
 schema(data, hints=Dict{Symbol,Any}()) = schema(Tables.columntable(data), hints)
@@ -77,7 +77,7 @@ function schema(
     dt::Tables.ColumnTable,
     hints::Dict{Symbol}=Dict{Symbol,Any}(),
 )
-    return sch = Schema(t => concrete_term(t, dt, hints) for t in ts)
+    return Schema(t => concrete_term(t, dt, hints) for t in ts)
 end
 
 function schema(f::TermOrTerms, data, hints::Dict{Symbol})
