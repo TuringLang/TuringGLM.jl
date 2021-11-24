@@ -17,6 +17,7 @@ Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 [compat]
 DataAPI = "1.9"
 Reexport = "1.2"
+StatsBase = "0.33"
 TableOperations = "1.2"
 Tables = "1.6"
 Turing = "0.19"
