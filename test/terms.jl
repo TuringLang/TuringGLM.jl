@@ -7,7 +7,15 @@ mimestring(x) = mimestring(MIME"text/plain", x)
 
 @testset "terms" begin
     using TuringGLM:
-        apply_schema, concrete_term, hasresponse, hasintercept, omitsintercept, schema, term
+        apply_schema,
+        coefnames,
+        collect_matrix_terms,
+        concrete_term,
+        hasresponse,
+        hasintercept,
+        omitsintercept,
+        schema,
+        term
     using TuringGLM: ContrastsMatrix, DummyCoding, FullDummyCoding
     using TuringGLM:
         ContinuousTerm,
@@ -191,5 +199,84 @@ mimestring(x) = mimestring(MIME"text/plain", x)
         t = (a=[1, 2, 3], b=[0.0, 0.5, 1.0])
         @test Tables.istable(t)
         @test_throws ArgumentError concrete_term(term(:not_there), t)
+    end
+
+    @testset "coefnames" begin
+        f = @formula y_float ~ 0 + x_int + x_cat
+        sch = schema(f, nt_str)
+        ts = apply_schema(f.rhs, sch)
+        ts = collect_matrix_terms(ts)
+        coef_names = coefnames(ts)
+        @test coef_names == ["x_int", "x_cat: 2", "x_cat: 3", "x_cat: 4"]
+
+        f = @formula y_float ~ 1 + x_int + x_cat
+        sch = schema(f, nt_str)
+        ts = apply_schema(f.rhs, sch)
+        ts = collect_matrix_terms(ts)
+        coef_names = coefnames(ts)
+        @test coef_names == ["x_int", "x_cat: 2", "x_cat: 3", "x_cat: 4"]
+
+        f = @formula y_float ~ 0 + x_float * x_cat_ordered
+        sch = schema(f, nt_cat)
+        ts = apply_schema(f.rhs, sch)
+        ts = collect_matrix_terms(ts)
+        coef_names = coefnames(ts)
+        @test coef_names == [
+            "x_float",
+            "x_cat_ordered: 2",
+            "x_cat_ordered: 3",
+            "x_cat_ordered: 4",
+            "x_float & x_cat_ordered: 2",
+            "x_float & x_cat_ordered: 3",
+            "x_float & x_cat_ordered: 4",
+        ]
+
+        f = @formula y_float ~ 1 + x_float * x_cat_ordered
+        sch = schema(f, nt_cat)
+        ts = apply_schema(f.rhs, sch)
+        ts = collect_matrix_terms(ts)
+        coef_names = coefnames(ts)
+        @test coef_names == [
+            "x_float",
+            "x_cat_ordered: 2",
+            "x_cat_ordered: 3",
+            "x_cat_ordered: 4",
+            "x_float & x_cat_ordered: 2",
+            "x_float & x_cat_ordered: 3",
+            "x_float & x_cat_ordered: 4",
+        ]
+
+        # Interactions coming first
+        f = @formula y_float ~ 1 + x_int * x_cat + x_float
+        sch = schema(f, nt_str)
+        ts = apply_schema(f.rhs, sch)
+        ts = collect_matrix_terms(ts)
+        coef_names = coefnames(ts)
+        @test coef_names == [
+            "x_int",
+            "x_cat: 2",
+            "x_cat: 3",
+            "x_cat: 4",
+            "x_float",
+            "x_int & x_cat: 2",
+            "x_int & x_cat: 3",
+            "x_int & x_cat: 4",
+        ]
+
+        f = @formula y_float ~ 1 + x_int * x_cat_ordered + x_float
+        sch = schema(f, nt_cat)
+        ts = apply_schema(f.rhs, sch)
+        ts = collect_matrix_terms(ts)
+        coef_names = coefnames(ts)
+        @test coef_names == [
+            "x_int",
+            "x_cat_ordered: 2",
+            "x_cat_ordered: 3",
+            "x_cat_ordered: 4",
+            "x_float",
+            "x_int & x_cat_ordered: 2",
+            "x_int & x_cat_ordered: 3",
+            "x_int & x_cat_ordered: 4",
+        ]
     end
 end

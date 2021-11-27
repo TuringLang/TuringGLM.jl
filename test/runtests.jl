@@ -25,11 +25,11 @@ df_str = DataFrame(nt_str)
 df_cat = DataFrame(nt_cat)
 
 @testset "TuringGLM.jl" begin
-    # include("utils.jl")
     include("formula.jl")
     include("terms.jl")
     include("schema.jl")
     include("error_messages.jl")
-    # include("contrasts.jl")
-    # include("data_constructors.jl")
+    include("contrasts.jl")
+    include("data_constructors.jl")
+    include("utils.jl")
 end

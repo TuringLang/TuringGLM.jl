@@ -164,11 +164,6 @@ apply_schema(t, schema) = t
 apply_schema(terms::TupleTerm, schema) = reduce(+, apply_schema.(terms, Ref(schema)))
 
 apply_schema(t::Term, schema::Schema) = schema[t]
-function apply_schema(ft::FormulaTerm, schema::Schema)
-    return FormulaTerm(
-        apply_schema(ft.lhs, schema), collect_matrix_terms(apply_schema(ft.rhs, schema))
-    )
-end
 function apply_schema(it::InteractionTerm, schema::Schema)
     return InteractionTerm(apply_schema(it.terms, schema))
 end
