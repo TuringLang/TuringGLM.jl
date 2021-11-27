@@ -51,37 +51,24 @@
         @testset "NamedTuples" begin
             f = @formula y_int ~ 0 + x_float + x_cat
             X = TuringGLM.data_fixed_effects(f, nt_str)
-            @test X == [
+            expected = [
                 1.1 0.0 0.0 0.0
                 2.3 1.0 0.0 0.0
                 3.14 0.0 1.0 0.0
                 3.65 0.0 0.0 1.0
             ]
+            @test X == expected
             f = @formula y_int ~ 1 + x_float + x_cat
             X = TuringGLM.data_fixed_effects(f, nt_str)
-            @test X == [
-                1.1 0.0 0.0 0.0
-                2.3 1.0 0.0 0.0
-                3.14 0.0 1.0 0.0
-                3.65 0.0 0.0 1.0
-            ]
+            @test X == expected
 
             f = @formula y_float ~ 0 + x_float + x_cat
             X = TuringGLM.data_fixed_effects(f, nt_str)
-            @test X == [
-                1.1 0.0 0.0 0.0
-                2.3 1.0 0.0 0.0
-                3.14 0.0 1.0 0.0
-                3.65 0.0 0.0 1.0
-            ]
+            @test X == expected
+            
             f = @formula y_float ~ 1 + x_float + x_cat
             X = TuringGLM.data_fixed_effects(f, nt_str)
-            @test X == [
-                1.1 0.0 0.0 0.0
-                2.3 1.0 0.0 0.0
-                3.14 0.0 1.0 0.0
-                3.65 0.0 0.0 1.0
-            ]
+            @test X == expected
 
             f = @formula y_int ~ 0 + x_float + x_cat_ordered
             X = TuringGLM.data_fixed_effects(f, nt_cat)
