@@ -1,44 +1,41 @@
 @testset "schema" begin
-    using TuringGLM:
-        apply_schema, collect_matrix_terms, concrete_term, has_schema, schema, term
-    using TuringGLM: CategoricalTerm, ConstantTerm, DummyCoding, Term, FullRank
-
     @testset "no-op apply_schema" begin
         f = @formula(y ~ 1 + a + b + c + b & c)
         df = (y=rand(9), a=1:9, b=rand(9), c=repeat(["d", "e", "f"], 3))
-        f = apply_schema(f, schema(f, df))
-        @test f == apply_schema(f, schema(f, df))
+        f = T.apply_schema(f, T.schema(f, df))
+        @test f == T.apply_schema(f, T.schema(f, df))
     end
 
     @testset "lonely term in a tuple" begin
         d = (a=[1, 1],)
-        @test apply_schema(ConstantTerm(1), schema(d)) ==
-            apply_schema((ConstantTerm(1),), schema(d))
-        @test apply_schema(Term(:a), schema(d)) == apply_schema((Term(:a),), schema(d))
+        @test T.apply_schema(T.ConstantTerm(1), T.schema(d)) ==
+            T.apply_schema((T.ConstantTerm(1),), T.schema(d))
+        @test T.apply_schema(T.Term(:a), T.schema(d)) ==
+            T.apply_schema((T.Term(:a),), T.schema(d))
     end
 
     @testset "hints" begin
         f = @formula(y ~ 1 + a)
         d = (y=rand(10), a=repeat([1, 2]; outer=2))
 
-        sch = schema(f, d)
-        @test sch[term(:a)] isa ContinuousTerm
+        sch = T.schema(f, d)
+        @test sch[T.term(:a)] isa T.ContinuousTerm
 
-        sch1 = schema(f, d, Dict(:a => CategoricalTerm))
-        @test sch1[term(:a)] isa CategoricalTerm{DummyCoding}
-        f1 = apply_schema(f, sch1)
-        @test f1.rhs.terms[end] == sch1[term(:a)]
+        sch1 = T.schema(f, d, Dict(:a => T.CategoricalTerm))
+        @test sch1[T.term(:a)] isa T.CategoricalTerm{T.DummyCoding}
+        f1 = T.apply_schema(f, sch1)
+        @test f1.rhs.terms[end] == sch1[T.term(:a)]
 
-        sch2 = schema(f, d, Dict(:a => DummyCoding()))
-        @test sch2[term(:a)] isa CategoricalTerm{DummyCoding}
-        f2 = apply_schema(f, sch2)
-        @test f2.rhs.terms[end] == sch2[term(:a)]
+        sch2 = T.schema(f, d, Dict(:a => T.DummyCoding()))
+        @test sch2[T.term(:a)] isa T.CategoricalTerm{T.DummyCoding}
+        f2 = T.apply_schema(f, sch2)
+        @test f2.rhs.terms[end] == sch2[T.term(:a)]
 
-        hint = deepcopy(sch2[term(:a)])
-        sch3 = schema(f, d, Dict(:a => hint))
+        hint = deepcopy(sch2[T.term(:a)])
+        sch3 = T.schema(f, d, Dict(:a => hint))
         # if an <:AbstractTerm is supplied as hint, it's included as is
-        @test sch3[term(:a)] === hint !== sch2[term(:a)]
-        f3 = apply_schema(f, sch3)
+        @test sch3[T.term(:a)] === hint !== sch2[T.term(:a)]
+        f3 = T.apply_schema(f, sch3)
         @test f3.rhs.terms[end] === hint
     end
 
@@ -46,25 +43,25 @@
         d = (y=rand(10), a=rand(10), b=repeat([:a, :b], 5))
 
         f = @formula(y ~ a * b)
-        @test !has_schema(f)
-        @test !has_schema(f.rhs)
-        @test !has_schema(collect_matrix_terms(f.rhs))
+        @test !T.has_schema(f)
+        @test !T.has_schema(f.rhs)
+        @test !T.has_schema(T.collect_matrix_terms(f.rhs))
 
-        ff = apply_schema(f, schema(d))
-        @test has_schema(ff)
-        @test has_schema(ff.rhs)
-        @test has_schema(collect_matrix_terms(ff.rhs))
+        ff = T.apply_schema(f, T.schema(d))
+        @test T.has_schema(ff)
+        @test T.has_schema(ff.rhs)
+        @test T.has_schema(T.collect_matrix_terms(ff.rhs))
 
-        sch = schema(d)
-        a, b = term.((:a, :b))
-        @test !has_schema(a)
-        @test has_schema(sch[a])
-        @test !has_schema(b)
-        @test has_schema(sch[b])
+        sch = T.schema(d)
+        a, b = T.term.((:a, :b))
+        @test !T.has_schema(a)
+        @test T.has_schema(sch[a])
+        @test !T.has_schema(b)
+        @test T.has_schema(sch[b])
 
-        @test !has_schema(a & b)
-        @test !has_schema(a & sch[b])
-        @test !has_schema(sch[a] & a)
-        @test has_schema(sch[a] & sch[b])
+        @test !T.has_schema(a & b)
+        @test !T.has_schema(a & sch[b])
+        @test !T.has_schema(sch[a] & a)
+        @test T.has_schema(sch[a] & sch[b])
     end
 end

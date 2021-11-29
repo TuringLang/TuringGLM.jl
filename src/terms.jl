@@ -177,14 +177,7 @@ random-effects terms.
 """
 function collect_matrix_terms(ts::TupleTerm)
     ismat = collect(is_matrix_term.(ts))
-    if all(ismat)
-        MatrixTerm(ts)
-    elseif any(ismat)
-        matterms = ts[ismat]
-        (MatrixTerm(ts[ismat]), ts[.!ismat]...)
-    else
-        ts
-    end
+    return all(ismat) ? MatrixTerm(ts) : MatrixTerm(ts[ismat])
 end
 
 function collect_matrix_terms(t::T) where {T<:AbstractTerm}
@@ -205,8 +198,10 @@ matrix terms, this defaults to `true` for any `AbstractTerm`.
 An example of a non-matrix term is a random-effect term
 [`TuringGLM.RandomEffectTerm`](@ref).
 """
-is_matrix_term(::T) where {T} = is_matrix_term(T)
-is_matrix_term(::Type{<:AbstractTerm}) = true
+is_matrix_term(::InterceptTerm) = false
+is_matrix_term(::ConstantTerm) = false
+# fallback
+is_matrix_term(::AbstractTerm) = true
 
 extract_symbols(x) = Symbol[]
 extract_symbols(x::Symbol) = [x]
