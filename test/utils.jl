@@ -2,8 +2,8 @@
     @testset "center_predictors" begin
         @testset "NamedTuples" begin
             f = @formula(y_int ~ x_float + x_cat)
-            X = TuringGLM.data_fixed_effects(f, nt_str)
-            μ_X, X_centered = TuringGLM.center_predictors(X)
+            X = T.data_fixed_effects(f, nt_str)
+            μ_X, X_centered = T.center_predictors(X)
             @test μ_X ≈ [2.547 0.25 0.25 0.25] atol = 0.01
             @test X_centered ≈ [
                 -1.447 -0.25 -0.25 -0.25
@@ -16,8 +16,8 @@
 
         @testset "DataFrames" begin
             f = @formula(y_int ~ x_float + x_cat)
-            X = TuringGLM.data_fixed_effects(f, df_str)
-            μ_X, X_centered = TuringGLM.center_predictors(X)
+            X = T.data_fixed_effects(f, df_str)
+            μ_X, X_centered = T.center_predictors(X)
             @test μ_X ≈ [2.547 0.25 0.25 0.25] atol = 0.01
             @test X_centered ≈ [
                 -1.447 -0.25 -0.25 -0.25
@@ -32,8 +32,8 @@
     @testset "standardize_predictors" begin
         @testset "NamedTuples" begin
             f = @formula(y_int ~ x_float + x_cat)
-            X = TuringGLM.data_fixed_effects(f, nt_str)
-            μ_X, σ_X, X_std = TuringGLM.standardize_predictors(X)
+            X = T.data_fixed_effects(f, nt_str)
+            μ_X, σ_X, X_std = T.standardize_predictors(X)
             @test μ_X ≈ [2.547 0.25 0.25 0.25] atol = 0.01
             @test σ_X ≈ [1.114 0.5 0.5 0.5] atol = 0.01
             @test X_std ≈ [
@@ -48,8 +48,8 @@
 
         @testset "DataFrames" begin
             f = @formula(y_int ~ x_float + x_cat)
-            X = TuringGLM.data_fixed_effects(f, df_str)
-            μ_X, σ_X, X_std = TuringGLM.standardize_predictors(X)
+            X = T.data_fixed_effects(f, df_str)
+            μ_X, σ_X, X_std = T.standardize_predictors(X)
             @test μ_X ≈ [2.547 0.25 0.25 0.25] atol = 0.01
             @test σ_X ≈ [1.114 0.5 0.5 0.5] atol = 0.01
             @test X_std ≈ [

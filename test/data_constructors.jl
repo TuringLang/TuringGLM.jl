@@ -3,52 +3,52 @@
         @testset "NamedTuples" begin
             expected = [2, 3, 4, 5]
             f = @formula y_int ~ 0 + x_float + x_cat
-            y = TuringGLM.data_response(f, nt_str)
+            y = T.data_response(f, nt_str)
             @test y == expected
-            y = TuringGLM.data_response(f, nt_cat)
+            y = T.data_response(f, nt_cat)
             @test y == expected
             f = @formula y_int ~ 1 + x_float + x_cat
-            y = TuringGLM.data_response(f, nt_str)
+            y = T.data_response(f, nt_str)
             @test y == expected
-            y = TuringGLM.data_response(f, nt_cat)
+            y = T.data_response(f, nt_cat)
             @test y == expected
 
             expected = [2.3, 3.4, 4.5, 5.4]
             f = @formula y_float ~ 0 + x_float + x_cat
-            y = TuringGLM.data_response(f, nt_str)
+            y = T.data_response(f, nt_str)
             @test y == expected
-            y = TuringGLM.data_response(f, nt_cat)
+            y = T.data_response(f, nt_cat)
             @test y == expected
             f = @formula y_float ~ 1 + x_float + x_cat
             @test y == expected
-            y = TuringGLM.data_response(f, nt_str)
+            y = T.data_response(f, nt_str)
             @test y == expected
-            y = TuringGLM.data_response(f, nt_cat)
+            y = T.data_response(f, nt_cat)
             @test y == expected
         end
         @testset "DataFrames" begin
             expected = [2, 3, 4, 5]
             f = @formula y_int ~ 0 + x_float + x_cat
-            y = TuringGLM.data_response(f, df_str)
+            y = T.data_response(f, df_str)
             @test y == expected
-            y = TuringGLM.data_response(f, df_cat)
+            y = T.data_response(f, df_cat)
             @test y == expected
             f = @formula y_int ~ 1 + x_float + x_cat
-            y = TuringGLM.data_response(f, df_str)
+            y = T.data_response(f, df_str)
             @test y == expected
-            y = TuringGLM.data_response(f, df_cat)
+            y = T.data_response(f, df_cat)
             @test y == expected
 
             expected = [2.3, 3.4, 4.5, 5.4]
             f = @formula y_float ~ 0 + x_float + x_cat
-            y = TuringGLM.data_response(f, df_str)
+            y = T.data_response(f, df_str)
             @test y == expected
-            y = TuringGLM.data_response(f, df_cat)
+            y = T.data_response(f, df_cat)
             @test y == expected
             f = @formula y_float ~ 1 + x_float + x_cat
-            y = TuringGLM.data_response(f, df_str)
+            y = T.data_response(f, df_str)
             @test y == expected
-            y = TuringGLM.data_response(f, df_cat)
+            y = T.data_response(f, df_cat)
             @test y == expected
         end
     end
@@ -62,35 +62,35 @@
             ]
 
             f = @formula y_int ~ 0 + x_float + x_cat
-            X = TuringGLM.data_fixed_effects(f, nt_str)
+            X = T.data_fixed_effects(f, nt_str)
             @test X == expected
 
             f = @formula y_int ~ 1 + x_float + x_cat
-            X = TuringGLM.data_fixed_effects(f, nt_str)
+            X = T.data_fixed_effects(f, nt_str)
             @test X == expected
 
             f = @formula y_float ~ 0 + x_float + x_cat
-            X = TuringGLM.data_fixed_effects(f, nt_str)
+            X = T.data_fixed_effects(f, nt_str)
             @test X == expected
 
             f = @formula y_float ~ 1 + x_float + x_cat
-            X = TuringGLM.data_fixed_effects(f, nt_str)
+            X = T.data_fixed_effects(f, nt_str)
             @test X == expected
 
             f = @formula y_int ~ 0 + x_float + x_cat_ordered
-            X = TuringGLM.data_fixed_effects(f, nt_cat)
+            X = T.data_fixed_effects(f, nt_cat)
             @test X == expected
 
             f = @formula y_int ~ 1 + x_float + x_cat_ordered
-            X = TuringGLM.data_fixed_effects(f, nt_cat)
+            X = T.data_fixed_effects(f, nt_cat)
             @test X == expected
 
             f = @formula y_float ~ 0 + x_float + x_cat_ordered
-            X = TuringGLM.data_fixed_effects(f, nt_cat)
+            X = T.data_fixed_effects(f, nt_cat)
             @test X == expected
 
             f = @formula y_float ~ 1 + x_float + x_cat_ordered
-            X = TuringGLM.data_fixed_effects(f, nt_cat)
+            X = T.data_fixed_effects(f, nt_cat)
             @test X == expected
 
             # Interactions
@@ -102,27 +102,27 @@
             ]
 
             f = @formula y_float ~ 0 + x_int * x_cat
-            X = TuringGLM.data_fixed_effects(f, nt_str)
+            X = T.data_fixed_effects(f, nt_str)
             @test X == expected
 
             f = @formula y_float ~ 1 + x_int * x_cat
-            X = TuringGLM.data_fixed_effects(f, nt_str)
+            X = T.data_fixed_effects(f, nt_str)
             @test X == expected
 
             f = @formula y_float ~ 0 + x_int * x_cat
-            X = TuringGLM.data_fixed_effects(f, nt_cat)
+            X = T.data_fixed_effects(f, nt_cat)
             @test X == expected
 
             f = @formula y_float ~ 1 + x_int * x_cat
-            X = TuringGLM.data_fixed_effects(f, nt_cat)
+            X = T.data_fixed_effects(f, nt_cat)
             @test X == expected
 
             f = @formula y_float ~ 0 + x_int * x_cat_ordered
-            X = TuringGLM.data_fixed_effects(f, nt_cat)
+            X = T.data_fixed_effects(f, nt_cat)
             @test X == expected
 
             f = @formula y_float ~ 1 + x_int * x_cat_ordered
-            X = TuringGLM.data_fixed_effects(f, nt_cat)
+            X = T.data_fixed_effects(f, nt_cat)
             @test X == expected
 
             # Interactions coming first
@@ -134,7 +134,7 @@
             ]
 
             f = @formula y_float ~ 1 + x_int * x_cat + x_float
-            X = TuringGLM.data_fixed_effects(f, nt_str)
+            X = T.data_fixed_effects(f, nt_str)
             @test X == expected
         end
         @testset "DataFrames" begin
@@ -146,35 +146,35 @@
             ]
 
             f = @formula(y_int ~ 0 + x_float + x_cat)
-            X = TuringGLM.data_fixed_effects(f, df_str)
+            X = T.data_fixed_effects(f, df_str)
             @test X == expected
 
             f = @formula(y_int ~ 1 + x_float + x_cat)
-            X = TuringGLM.data_fixed_effects(f, df_str)
+            X = T.data_fixed_effects(f, df_str)
             @test X == expected
 
             f = @formula(y_float ~ 0 + x_float + x_cat)
-            X = TuringGLM.data_fixed_effects(f, df_str)
+            X = T.data_fixed_effects(f, df_str)
             @test X == expected
 
             f = @formula(y_float ~ 1 + x_float + x_cat)
-            X = TuringGLM.data_fixed_effects(f, df_str)
+            X = T.data_fixed_effects(f, df_str)
             @test X == expected
 
             f = @formula(y_int ~ 0 + x_float + x_cat_ordered)
-            X = TuringGLM.data_fixed_effects(f, df_cat)
+            X = T.data_fixed_effects(f, df_cat)
             @test X == expected
 
             f = @formula(y_int ~ 1 + x_float + x_cat_ordered)
-            X = TuringGLM.data_fixed_effects(f, df_cat)
+            X = T.data_fixed_effects(f, df_cat)
             @test X == expected
 
             f = @formula(y_float ~ 0 + x_float + x_cat_ordered)
-            X = TuringGLM.data_fixed_effects(f, df_cat)
+            X = T.data_fixed_effects(f, df_cat)
             @test X == expected
 
             f = @formula(y_float ~ 1 + x_float + x_cat_ordered)
-            X = TuringGLM.data_fixed_effects(f, df_cat)
+            X = T.data_fixed_effects(f, df_cat)
             @test X == expected
 
             # Interactions
@@ -186,27 +186,27 @@
             ]
 
             f = @formula y_float ~ 0 + x_int * x_cat
-            X = TuringGLM.data_fixed_effects(f, df_str)
+            X = T.data_fixed_effects(f, df_str)
             @test X == expected
 
             f = @formula y_float ~ 1 + x_int * x_cat
-            X = TuringGLM.data_fixed_effects(f, df_str)
+            X = T.data_fixed_effects(f, df_str)
             @test X == expected
 
             f = @formula y_float ~ 0 + x_int * x_cat
-            X = TuringGLM.data_fixed_effects(f, df_cat)
+            X = T.data_fixed_effects(f, df_cat)
             @test X == expected
 
             f = @formula y_float ~ 1 + x_int * x_cat
-            X = TuringGLM.data_fixed_effects(f, df_cat)
+            X = T.data_fixed_effects(f, df_cat)
             @test X == expected
 
             f = @formula y_float ~ 0 + x_int * x_cat_ordered
-            X = TuringGLM.data_fixed_effects(f, df_cat)
+            X = T.data_fixed_effects(f, df_cat)
             @test X == expected
 
             f = @formula y_float ~ 1 + x_int * x_cat_ordered
-            X = TuringGLM.data_fixed_effects(f, df_cat)
+            X = T.data_fixed_effects(f, df_cat)
             @test X == expected
 
             # Interactions coming first
@@ -218,7 +218,7 @@
             ]
 
             f = @formula y_float ~ 1 + x_int * x_cat + x_float
-            X = TuringGLM.data_fixed_effects(f, df_str)
+            X = T.data_fixed_effects(f, df_str)
             @test X == expected
         end
     end

@@ -4,6 +4,8 @@ using DataFrames
 using CategoricalArrays: categorical
 using Statistics: mean, std
 
+const T = TuringGLM
+
 x_float = [1.1, 2.3, 3.14, 3.65]
 x_int = [1, 2, 3, 4]
 y_float = [2.3, 3.4, 4.5, 5.4]
