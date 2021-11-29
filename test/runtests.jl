@@ -1,7 +1,7 @@
 using TuringGLM
 using Test
 using DataFrames
-using CategoricalArrays: categorical
+using CategoricalArrays: categorical, levels
 using Statistics: mean, std
 
 const T = TuringGLM
