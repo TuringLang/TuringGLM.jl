@@ -223,4 +223,23 @@
         end
     end
     @testset "data_random_effects" begin end
+    @testset "_has_ranef" begin
+        f = @formula y_float ~ 1 + x_int + x_cat
+        @test T._has_ranef(f) == false
+
+        f = @formula y_float ~ 1 + x_int + (1 | x_cat)
+        @test T._has_ranef(f) == true
+
+        f = @formula y_float ~ 0 + x_int + x_cat
+        @test T._has_ranef(f) == false
+
+        f = @formula y_float ~ 0 + x_int + (1 | x_cat)
+        @test T._has_ranef(f) == true
+
+        f = @formula y_float ~ x_int + x_cat
+        @test T._has_ranef(f) == false
+
+        f = @formula y_float ~ x_int + (1 | x_cat)
+        @test T._has_ranef(f) == true
+    end
 end
