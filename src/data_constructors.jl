@@ -43,10 +43,10 @@ end
 """
     data_random_effects(formula::FormulaTerm, data)
 
-Constructs the matrix(ces) Z(s) of random-effects (a.k.a. group-level) predictors.
+Constructs the vector(s)/matrix(ces) Z(s) of random-effects (a.k.a. group-level) predictors.
 
-Returns a Tuple of `Matrix` of the random-effects predictors variables in the `formula`
-and present inside `data`.
+Returns a `Dict{String, AbstractArray}` of `Vector`/`Matrix` as values of the random-effects
+predictors variables (keys) in the `formula` and present inside `data`.
 
 # Arguments
 - `formula`: a `FormulaTerm` created by `@formula` macro.
@@ -54,9 +54,30 @@ and present inside `data`.
 [Tables.jl](https://github.com/JuliaData/Tables.jl) interface such as a DataFrame.
 """
 function data_random_effects(formula::FormulaTerm, data::D) where {D}
-    Z = nothing
-    # TODO:
-    # is_matrix_terms false for random-effects.
+    # with zerocorr we create only vectors and add them one by one with NCP
+    # without zerocorr we create a full-blown matrix with NCP
+    Z = (;) # empty NamedTuple
+    if !has_ranef(formula)
+        Z = nothing
+    end
+    if has_zerocorr(formula)
+        # vectors of random effects
+        vec_intercepts = intercept_per_ranef(formula)
+        vec_slopes = slope_per_ranef(formula)
+        
+        if length(vec_intercepts) > 0
+            # add the intercepts to Z
+        end
+        
+        if length(vec_slopes) > 0
+            # add the slopes to Z
+        end
+    elseif !has_zerocorr(formula)
+        # matrix of random effects
+    else
+        # fallback
+        Z = nothing
+    end
     return Z
 end
 
@@ -78,7 +99,7 @@ If there are no `FunctionTerm`s in `formula` returns `nothing`.
 """
 function ranef(formula::FormulaTerm)
     if has_ranef(formula)
-        terms = filter(t -> t isa FunctionTerm, formula.rhs)
+        terms = filter(t -> t isa FunctionTerm{typeof(|)}, formula.rhs)
         terms = map(
             t -> RandomEffectsTerm(first(t.args_parsed), last(t.args_parsed)), terms
         )
@@ -148,3 +169,16 @@ function slope_per_ranef(terms::Tuple)
     end
     return vec_slopes
 end
+
+"""
+    has_zerocorr(formula::FormulaTerm)
+
+Returns `true` if any of the terms in `formula` is a `ZeroCorr` or false
+otherwise.
+"""
+function has_zerocorr(formula::FormulaTerm)
+    return any(t -> t isa FunctionTerm{typeof(zerocorr)}, formula.rhs)
+end
+
+# TODO:
+#   complex zerocorr stuff like a ranef term has zerocorr and other do not.
