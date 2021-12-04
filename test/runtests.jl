@@ -1,6 +1,7 @@
 using TuringGLM
 using Test
 using DataFrames
+using CategoricalArrays: CategoricalValue
 using CategoricalArrays: categorical, levels
 using Statistics: mean, std
 

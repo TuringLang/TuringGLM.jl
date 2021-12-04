@@ -226,16 +226,60 @@
     @testset "data_random_effects" begin
         expected = nothing
         f = @formula y_float ~ 1 + x_int * x_cat + x_float
-
         Z = T.data_random_effects(f, nt_str)
         @test Z == expected
-
         Z = T.data_random_effects(f, nt_cat)
         @test Z == expected
-
         Z = T.data_random_effects(f, df_str)
         @test Z == expected
+        Z = T.data_random_effects(f, df_cat)
+        @test Z == expected
 
+        f = @formula y_float ~ 1 + x_float + (1 | x_cat) + (1 | x_cat)
+        Z = T.data_random_effects(f, nt_str)
+        @test Z == expected
+        Z = T.data_random_effects(f, nt_cat)
+        @test Z == expected
+        Z = T.data_random_effects(f, df_str)
+        @test Z == expected
+        Z = T.data_random_effects(f, df_cat)
+        @test Z == expected
+
+        expected = Dict("slope_x_int" => [1.0, 2.0, 3.0, 4.0])
+        f = @formula y_float ~ 1 + (1 + x_int | x_cat)
+        Z = T.data_random_effects(f, nt_str)
+        @test Z == expected
+        Z = T.data_random_effects(f, nt_cat)
+        @test Z == expected
+        Z = T.data_random_effects(f, df_str)
+        @test Z == expected
+        Z = T.data_random_effects(f, df_cat)
+        @test Z == expected
+
+        expected = Dict(
+            "slope_x_float" => [1.1, 2.3, 3.14, 3.65], "slope_x_int" => [1.0, 2.0, 3.0, 4.0]
+        )
+        f = @formula y_float ~ 1 + (1 + x_int + x_float | x_cat)
+        Z = T.data_random_effects(f, nt_str)
+        @test Z == expected
+        Z = T.data_random_effects(f, nt_cat)
+        @test Z == expected
+        Z = T.data_random_effects(f, df_str)
+        @test Z == expected
+        Z = T.data_random_effects(f, df_cat)
+        @test Z == expected
+
+        expected = Dict(
+            "slope_x_float" => [1.1, 2.3, 3.14, 3.65], "slope_x_int" => [1.0, 2.0, 3.0, 4.0]
+        )
+        f = @formula y_float ~
+            1 + (1 + x_int + x_float | x_cat) + (1 + x_int + x_float | group)
+        Z = T.data_random_effects(f, nt_str)
+        @test Z == expected
+        Z = T.data_random_effects(f, nt_cat)
+        @test Z == expected
+        Z = T.data_random_effects(f, df_str)
+        @test Z == expected
         Z = T.data_random_effects(f, df_cat)
         @test Z == expected
     end
@@ -320,7 +364,7 @@
         f = @formula y_float ~ 1 + x_int + xcat + (1 | x_cat)
         @test T.slope_per_ranef(T.ranef(f)) == T.SlopePerRanEf()
 
-        f = @formula y_float ~ 1 + (1 + x_int + x_float | x_cat)
+        f = @formula y_float ~ 2 + (1 + x_int + x_float | x_cat)
         @test T.slope_per_ranef(T.ranef(f)) ==
             T.SlopePerRanEf(Dict("x_cat" => ["x_int", "x_float"]))
 
@@ -365,5 +409,48 @@
             (1 + x_int + x_float | group) +
             zerocorr(group)
         @test T.has_zerocorr(f) == true
+    end
+
+    @testset "get_idx" begin
+        expected = ([1, 2, 3, 4], Dict(1.1 => 1, 3.65 => 4, 2.3 => 2, 3.14 => 3))
+        @test T.get_idx(T.term("x_float"), nt_str) == expected
+        @test T.get_idx(T.term("x_float"), df_str) == expected
+        @test T.get_idx(T.term("x_float"), nt_cat) == expected
+        @test T.get_idx(T.term("x_float"), df_cat) == expected
+
+        expected = ([1, 2, 3, 4], Dict("4" => 4, "1" => 1, "2" => 2, "3" => 3))
+        @test T.get_idx(T.term("x_cat"), nt_str) == expected
+        @test T.get_idx(T.term("x_cat"), df_str) == expected
+
+        cv = categorical([1, 2, 3, 4])
+        expected = (
+            [1, 2, 3, 4],
+            Dict(
+                CategoricalValue(4, cv) => 4,
+                CategoricalValue(2, cv) => 2,
+                CategoricalValue(3, cv) => 3,
+                CategoricalValue(1, cv) => 1,
+            ),
+        )
+        @test T.get_idx(T.term("x_cat"), nt_cat) == expected
+        @test T.get_idx(T.term("x_cat"), df_cat) == expected
+    end
+
+    @testset "get_var" begin
+        expected = [1.1, 2.3, 3.14, 3.65]
+        @test T.get_var(T.term("x_float"), nt_str) == expected
+        @test T.get_var(T.term("x_float"), df_str) == expected
+
+        expected = [1.1, 2.3, 3.14, 3.65]
+        @test T.get_var(T.term("x_float"), nt_cat) == expected
+        @test T.get_var(T.term("x_float"), df_cat) == expected
+
+        expected = ["1", "2", "3", "4"]
+        @test T.get_var(T.term("x_cat"), nt_str) == expected
+        @test T.get_var(T.term("x_cat"), df_str) == expected
+
+        expected = categorical([1, 2, 3, 4])
+        @test T.get_var(T.term("x_cat"), nt_cat) == expected
+        @test T.get_var(T.term("x_cat"), df_cat) == expected
     end
 end

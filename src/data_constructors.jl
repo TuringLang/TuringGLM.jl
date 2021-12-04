@@ -53,10 +53,11 @@ end
 """
     data_random_effects(formula::FormulaTerm, data)
 
-Constructs the vector(s)/matrix(ces) Z(s) of random-effects (a.k.a. group-level) predictors.
+Constructs the vector(s)/matrix(ces) Z(s) of random-effects (a.k.a. group-level)
+slope predictors.
 
 Returns a `Dict{String, AbstractArray}` of `Vector`/`Matrix` as values of the random-effects
-predictors variables (keys) in the `formula` and present inside `data`.
+predictors slope variables (keys) in the `formula` and present inside `data`.
 
 # Arguments
 - `formula`: a `FormulaTerm` created by `@formula` macro.
@@ -66,39 +67,26 @@ predictors variables (keys) in the `formula` and present inside `data`.
 function data_random_effects(formula::FormulaTerm, data::D) where {D}
     # with zerocorr we create only vectors and add them one by one with NCP
     # without zerocorr we create a full-blown matrix with NCP
-    # TODO:
-    #   create the idx vector(s) of group(s) membership(s)
-    Z = Dict{String, AbstractArray}() # empty Dict
+    Z = Dict{String,AbstractArray}() # empty Dict
     if !has_ranef(formula)
-        Z = nothing
+        return nothing
     end
-    if has_zerocorr(formula)
-        # vectors of random effects
-        vec_intercepts = intercept_per_ranef(formula)
-        slopes = slope_per_ranef(formula)
+    slopes = slope_per_ranef(ranef(formula))
 
-        if length(vec_intercepts) > 0
-            # add the intercepts to Z
-            # this would need just the length of levels of the random-effects
-            # intercept term
-            for intercept in vec_intercepts
-                Z["intercept_" * intercept] = nothing
+    if length(slopes) > 0
+        # add the slopes to Z
+        # this would need to create a vector from the column of the X matrix from the
+        # slope term
+        for slope in values(slopes.grouping_vars)
+            if slope isa String
+                Z["slope_" * slope] = get_var(term(slope), data)
+            else
+                for s in slope
+                    Z["slope_" * s] = get_var(term(s), data)
+                end
             end
         end
-
-        if length(slopes) > 0
-            # add the slopes to Z
-            # this would need to create a vector from the column of the X matrix from the
-            # slope term
-            for slope in slopes.grouping_vars
-                # slope is a Pair{String, Vector{String}}
-                Z["slope_" * slope] = get_var()
-            end
-        end
-    elseif !has_zerocorr(formula)
-        # matrix of random effects
     else
-        # fallback
         Z = nothing
     end
     return Z
@@ -214,22 +202,26 @@ end
 #   complex zerocorr stuff like a ranef term has zerocorr and other do not.
 
 """
-    get_idx(term::Term, formula::FormulaTerm, data)
+    get_idx(term::Term, data)
 
-Returns an ID vector of `Int`s that represent group membership for a specific
-random-effect intercept group `group_term` in `formula` of observations present in `data`.
+Returns a tuple with the first element as the ID vector of `Int`s that represent
+group membership for a specific random-effect intercept group `t` of observations
+present in `data`. The second element of the tuple is a `Dict` specifying which string is
+which integer in the ID vector.
 """
-function get_idx(group_term::Term, formula::FormulaTerm, data::D) where {D}
-    return nothing
+function get_idx(t::Term, data::D) where {D}
+    col = Symbol(t)
+    idx = Tables.getcolumn(data, col)
+    return convert_str_to_indices(idx)
 end
 
 """
-    get_var(var_term::Term, group_term::Term, formula::FormulaTerm, data)
+    get_var(term::Term, data)
 
 Returns the corresponding vector of column in `data` for the a specific
-random-effect slope `var_term` for group `group_term` in `formula` of observations
-present in `data`.
+random-effect slope `term` of observations present in `data`.
 """
-function get_var(group_term::Term, formula::FormulaTerm, data::D) where {D}
-    return nothing
+function get_var(t::Term, data::D) where {D}
+    col = Symbol(t)
+    return Tables.getcolumn(data, col)
 end
