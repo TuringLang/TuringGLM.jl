@@ -72,4 +72,3 @@ function convert_str_to_indices(v::AbstractVector)
     end
     return v_int, d
 end
-
