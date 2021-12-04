@@ -12,5 +12,5 @@ TuringGLM makes easy to specify Bayesian **G**eneralized **L**inear **M**odels u
 
 Heavily inspired by [brms](https://github.com/paul-buerkner/brms/) (uses RStan or CmdStanR) and [bambi](https://github.com/bambinos/bambi) (uses PyMC3).
 
-The `@formula` macro is copied from [`StatsModels.jl`](https://github.com/JuliaStats/StatsModels.jl) along with [`MixedModels.jl`](https://github.com/JuliaStats/MixedModels.jl) for the random-effects (a.k.a. group-level predictors).
+The `@formula` macro is extended from [`StatsModels.jl`](https://github.com/JuliaStats/StatsModels.jl) along with [`MixedModels.jl`](https://github.com/JuliaStats/MixedModels.jl) for the random-effects (a.k.a. group-level predictors).
 
