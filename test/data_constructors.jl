@@ -222,24 +222,103 @@
             @test X == expected
         end
     end
+
     @testset "data_random_effects" begin end
-    @testset "_has_ranef" begin
+
+    @testset "has_ranef" begin
         f = @formula y_float ~ 1 + x_int + x_cat
-        @test T._has_ranef(f) == false
+        @test T.has_ranef(f) == false
 
         f = @formula y_float ~ 1 + x_int + (1 | x_cat)
-        @test T._has_ranef(f) == true
+        @test T.has_ranef(f) == true
 
         f = @formula y_float ~ 0 + x_int + x_cat
-        @test T._has_ranef(f) == false
+        @test T.has_ranef(f) == false
 
         f = @formula y_float ~ 0 + x_int + (1 | x_cat)
-        @test T._has_ranef(f) == true
+        @test T.has_ranef(f) == true
 
         f = @formula y_float ~ x_int + x_cat
-        @test T._has_ranef(f) == false
+        @test T.has_ranef(f) == false
 
         f = @formula y_float ~ x_int + (1 | x_cat)
-        @test T._has_ranef(f) == true
+        @test T.has_ranef(f) == true
+    end
+
+    @testset "ranef" begin
+        f = @formula y_float ~ 1 + x_int + x_cat
+        @test T.ranef(f) === nothing
+
+        f = @formula y_float ~ x_int + (1 | x_cat)
+        @test T.ranef(f) isa Tuple{T.RandomEffectsTerm}
+
+        f = @formula y_float ~ x_int + (1 + x_float | x_cat)
+        @test T.ranef(f) isa Tuple{T.RandomEffectsTerm}
+    end
+
+    @testset "n_ranef" begin
+        f = @formula y_float ~ 1 + x_int + x_cat
+        @test T.n_ranef(f) == 0
+
+        f = @formula y_float ~ x_int + (1 | x_cat)
+        @test T.n_ranef(f) == 1
+
+        f = @formula y_float ~ 1 + x_float + (1 | x_cat) + (1 | x_cat)
+        @test T.n_ranef(f) == 1
+
+        f = @formula y_float ~ 1 + x_float + (1 | x_cat) + (1 | group)
+        @test T.n_ranef(f) == 2
+
+        f = @formula y_float ~ x_int + (1 + x_float | x_cat)
+        @test T.n_ranef(f) == 2
+
+        f = @formula y_float ~ 1 + (1 + x_int + x_float | x_cat)
+        @test T.n_ranef(f) == 3
+
+        f = @formula y_float ~
+            1 + (1 + x_int + x_float | x_cat) + (1 + x_int + x_float | group)
+        @test T.n_ranef(f) == 6
+    end
+
+    @testset "intercept_per_ranef" begin
+        f = @formula y_float ~ 1 + x_int + xcat + (1 | x_cat)
+        @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat"]
+
+        f = @formula y_float ~ 1 + (1 + x_int + x_float | x_cat)
+        @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat"]
+
+        f = @formula y_float ~ 1 + x_float + (1 | x_cat) + (1 | x_cat)
+        @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat"]
+
+        f = @formula y_float ~ 1 + x_float + (1 | x_cat) + (1 | group)
+        @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat", "group"]
+
+        f = @formula y_float ~ 1 + (1 + x_int + x_float | x_cat)
+        @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat"]
+
+        f = @formula y_float ~
+            1 + (1 + x_int + x_float | x_cat) + (1 + x_int + x_float | group)
+        @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat", "group"]
+    end
+
+    @testset "slope_per_ranef" begin
+        f = @formula y_float ~ 1 + x_int + xcat + (1 | x_cat)
+        @test T.slope_per_ranef(T.ranef(f)) == Vector{String}()
+
+        f = @formula y_float ~ 1 + (1 + x_int + x_float | x_cat)
+        @test T.slope_per_ranef(T.ranef(f)) == ["x_cat"]
+
+        f = @formula y_float ~ 1 + x_float + (1 | x_cat) + (1 | x_cat)
+        @test T.slope_per_ranef(T.ranef(f)) == Vector{String}()
+
+        f = @formula y_float ~ 1 + x_float + (1 | x_cat) + (1 | group)
+        @test T.slope_per_ranef(T.ranef(f)) == Vector{String}()
+
+        f = @formula y_float ~ 1 + (1 + x_int + x_float | x_cat)
+        @test T.slope_per_ranef(T.ranef(f)) == ["x_cat"]
+
+        f = @formula y_float ~
+            1 + (1 + x_int + x_float | x_cat) + (1 + x_int + x_float | group)
+        @test T.slope_per_ranef(T.ranef(f)) == ["x_cat", "group"]
     end
 end

@@ -1,9 +1,9 @@
 module TuringGLM
 
 using Statistics: mean, std
-using StatsModels: FormulaTerm, FunctionTerm
+using StatsModels: ConstantTerm, FormulaTerm, FunctionTerm, Term
 using StatsModels: hasintercept, response
-using MixedModels: MixedModel
+using MixedModels: MixedModel, RandomEffectsTerm
 using MixedModels: zerocorr
 
 # Different modelmatrix

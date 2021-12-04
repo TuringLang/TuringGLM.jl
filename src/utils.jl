@@ -48,3 +48,11 @@ function standardize_predictors(X::AbstractMatrix)
     end
     return μ_X, σ_X, X_std
 end
+
+"""
+    tuple_length(::NTuple{N, Any}) where {N} = Int(N)
+
+This is a hack to get the length of any tuple.
+"""
+tuple_length(::NTuple{N,Any}) where {N} = Int(N)
+
