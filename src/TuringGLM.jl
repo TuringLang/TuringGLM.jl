@@ -1,5 +1,6 @@
 module TuringGLM
 
+import Base: ==, length
 using Statistics: mean, std
 using StatsModels: ConstantTerm, FormulaTerm, FunctionTerm, Term
 using StatsModels: hasintercept, response

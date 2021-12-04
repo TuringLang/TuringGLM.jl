@@ -1,3 +1,13 @@
+mutable struct SlopePerRanEf
+    grouping_vars::Dict{String,Vector{String}}
+    # inner constructors
+    SlopePerRanEf() = new(Dict{String,Vector{String}}())
+    SlopePerRanEf(d::Dict{String,Vector{String}}) = new(d)
+end
+isequal(x::SlopePerRanEf, y::SlopePerRanEf) = x.grouping_vars == y.grouping_vars
+==(x::SlopePerRanEf, y::SlopePerRanEf) = x.grouping_vars == y.grouping_vars
+length(x::SlopePerRanEf) = length(values(x.grouping_vars))
+
 """
     data_response(formula::FormulaTerm, data)
 
@@ -56,21 +66,34 @@ predictors variables (keys) in the `formula` and present inside `data`.
 function data_random_effects(formula::FormulaTerm, data::D) where {D}
     # with zerocorr we create only vectors and add them one by one with NCP
     # without zerocorr we create a full-blown matrix with NCP
-    Z = (;) # empty NamedTuple
+    # TODO:
+    #   create the idx vector(s) of group(s) membership(s)
+    Z = Dict{String, AbstractArray}() # empty Dict
     if !has_ranef(formula)
         Z = nothing
     end
     if has_zerocorr(formula)
         # vectors of random effects
         vec_intercepts = intercept_per_ranef(formula)
-        vec_slopes = slope_per_ranef(formula)
-        
+        slopes = slope_per_ranef(formula)
+
         if length(vec_intercepts) > 0
             # add the intercepts to Z
+            # this would need just the length of levels of the random-effects
+            # intercept term
+            for intercept in vec_intercepts
+                Z["intercept_" * intercept] = nothing
+            end
         end
-        
-        if length(vec_slopes) > 0
+
+        if length(slopes) > 0
             # add the slopes to Z
+            # this would need to create a vector from the column of the X matrix from the
+            # slope term
+            for slope in slopes.grouping_vars
+                # slope is a Pair{String, Vector{String}}
+                Z["slope_" * slope] = get_var()
+            end
         end
     elseif !has_zerocorr(formula)
         # matrix of random effects
@@ -155,19 +178,26 @@ end
 """
     slope_per_ranef(terms::Tuple{RandomEffectsTerm})
 
-Returns a vector of `String`s where the entries are the grouping variables that have
+Returns a `SlopePerRanEf` object where the entries are the grouping variables that have
 a group-level slope.
 """
 function slope_per_ranef(terms::Tuple)
-    vec_slopes = Vector{String}()
+    slopes = SlopePerRanEf()
     for ts in terms
         if ts.lhs isa Term
-            push!(vec_slopes, string(ts.rhs))
+            slopes.grouping_vars[string(ts.rhs)] = [string(ts.rhs)]
         elseif ts.lhs isa Tuple && any(t -> t isa Term, ts.lhs)
-            push!(vec_slopes, string(ts.rhs))
+            # empty first
+            slopes.grouping_vars[string(ts.rhs)] = Vector{String}()
+            # now populate
+            for tleft in ts.lhs
+                if tleft isa Term
+                    push!(slopes.grouping_vars[string(ts.rhs)], string(tleft))
+                end
+            end
         end
     end
-    return vec_slopes
+    return slopes
 end
 
 """
@@ -182,3 +212,24 @@ end
 
 # TODO:
 #   complex zerocorr stuff like a ranef term has zerocorr and other do not.
+
+"""
+    get_idx(term::Term, formula::FormulaTerm, data)
+
+Returns an ID vector of `Int`s that represent group membership for a specific
+random-effect intercept group `group_term` in `formula` of observations present in `data`.
+"""
+function get_idx(group_term::Term, formula::FormulaTerm, data::D) where {D}
+    return nothing
+end
+
+"""
+    get_var(var_term::Term, group_term::Term, formula::FormulaTerm, data)
+
+Returns the corresponding vector of column in `data` for the a specific
+random-effect slope `var_term` for group `group_term` in `formula` of observations
+present in `data`.
+"""
+function get_var(group_term::Term, formula::FormulaTerm, data::D) where {D}
+    return nothing
+end

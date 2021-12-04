@@ -318,23 +318,23 @@
 
     @testset "slope_per_ranef" begin
         f = @formula y_float ~ 1 + x_int + xcat + (1 | x_cat)
-        @test T.slope_per_ranef(T.ranef(f)) == Vector{String}()
+        @test T.slope_per_ranef(T.ranef(f)) == T.SlopePerRanEf()
 
         f = @formula y_float ~ 1 + (1 + x_int + x_float | x_cat)
-        @test T.slope_per_ranef(T.ranef(f)) == ["x_cat"]
+        @test T.slope_per_ranef(T.ranef(f)) ==
+            T.SlopePerRanEf(Dict("x_cat" => ["x_int", "x_float"]))
 
         f = @formula y_float ~ 1 + x_float + (1 | x_cat) + (1 | x_cat)
-        @test T.slope_per_ranef(T.ranef(f)) == Vector{String}()
+        @test T.slope_per_ranef(T.ranef(f)) == T.SlopePerRanEf()
 
         f = @formula y_float ~ 1 + x_float + (1 | x_cat) + (1 | group)
-        @test T.slope_per_ranef(T.ranef(f)) == Vector{String}()
-
-        f = @formula y_float ~ 1 + (1 + x_int + x_float | x_cat)
-        @test T.slope_per_ranef(T.ranef(f)) == ["x_cat"]
+        @test T.slope_per_ranef(T.ranef(f)) == T.SlopePerRanEf()
 
         f = @formula y_float ~
             1 + (1 + x_int + x_float | x_cat) + (1 + x_int + x_float | group)
-        @test T.slope_per_ranef(T.ranef(f)) == ["x_cat", "group"]
+        @test T.slope_per_ranef(T.ranef(f)) == T.SlopePerRanEf(
+            Dict("x_cat" => ["x_int", "x_float"], "group" => ["x_int", "x_float"])
+        )
     end
 
     @testset "has_zerocorr" begin
