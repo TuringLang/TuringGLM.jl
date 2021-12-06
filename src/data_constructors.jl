@@ -111,10 +111,10 @@ If there are no `FunctionTerm`s in `formula` returns `nothing`.
 function ranef(formula::FormulaTerm)
     if has_ranef(formula)
         terms = filter(t -> t isa FunctionTerm{typeof(|)}, formula.rhs)
-terms = map(terms) do t
-     lhs, rhs = first(t.args_parsed), last(t.args_parsed)
-     RandomEffectsTerm(u, v)
-end
+        terms = map(terms) do t
+            lhs, rhs = first(t.args_parsed), last(t.args_parsed)
+            RandomEffectsTerm(u, v)
+        end
     else
         terms = nothing
     end
