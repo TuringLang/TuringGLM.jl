@@ -67,12 +67,12 @@ predictors slope variables (keys) in the `formula` and present inside `data`.
 function data_random_effects(formula::FormulaTerm, data::D) where {D}
     # with zerocorr we create only vectors and add them one by one with NCP
     # without zerocorr we create a full-blown matrix with NCP
-    Z = Dict{String,AbstractArray}() # empty Dict
     if !has_ranef(formula)
         return nothing
     end
     slopes = slope_per_ranef(ranef(formula))
 
+    Z = Dict{String,AbstractArray}() # empty Dict
     if length(slopes) > 0
         # add the slopes to Z
         # this would need to create a vector from the column of the X matrix from the
@@ -111,9 +111,10 @@ If there are no `FunctionTerm`s in `formula` returns `nothing`.
 function ranef(formula::FormulaTerm)
     if has_ranef(formula)
         terms = filter(t -> t isa FunctionTerm{typeof(|)}, formula.rhs)
-        terms = map(
-            t -> RandomEffectsTerm(first(t.args_parsed), last(t.args_parsed)), terms
-        )
+terms = map(terms) do t
+     lhs, rhs = first(t.args_parsed), last(t.args_parsed)
+     RandomEffectsTerm(u, v)
+end
     else
         terms = nothing
     end
