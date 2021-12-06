@@ -1,6 +1,7 @@
 using TuringGLM
 using Test
 using DataFrames
+using CategoricalArrays: CategoricalValue
 using CategoricalArrays: categorical, levels
 using Statistics: mean, std
 
@@ -27,11 +28,6 @@ df_str = DataFrame(nt_str)
 df_cat = DataFrame(nt_cat)
 
 @testset "TuringGLM.jl" begin
-    include("formula.jl")
-    include("terms.jl")
-    include("schema.jl")
-    include("error_messages.jl")
-    include("contrasts.jl")
     include("data_constructors.jl")
     include("utils.jl")
 end

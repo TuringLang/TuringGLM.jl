@@ -48,3 +48,32 @@ function standardize_predictors(X::AbstractMatrix)
     end
     return μ_X, σ_X, X_std
 end
+
+"""
+    tuple_length(::NTuple{N, Any}) where {N} = Int(N)
+
+This is a hack to get the length of any tuple.
+"""
+tuple_length(::NTuple{N,Any}) where {N} = Int(N)
+
+"""
+    convert_str_to_indices(v::AbstractVector)
+
+Converts a vector `v` to a vector of indices, i.e. a vector where all the entries are
+integers. Returns a tuple with the first element as the converted vector and the
+second element a `Dict` specifying which string is which integer.
+
+This function is especially useful for random-effects varying-intercept hierarchical models.
+Normally `v` would be a vector of group membership with values such as `"group_1"`,
+`"group_2"` etc. For random-effect models with varying-intercepts, Turing needs the group
+membership values to be passed as `Int`s.
+"""
+function convert_str_to_indices(v::AbstractVector)
+    d = Dict{eltype(v),Int}()
+    v_int = Int[]
+    for i in v
+        n = get!(d, i, length(d) + 1)
+        push!(v_int, n)
+    end
+    return v_int, d
+end
