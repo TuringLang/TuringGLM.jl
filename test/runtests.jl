@@ -30,4 +30,6 @@ df_cat = DataFrame(nt_cat)
 @testset "TuringGLM.jl" begin
     include("data_constructors.jl")
     include("utils.jl")
+    include("canonicallink.jl")
+    include("turing_model.jl")
 end
