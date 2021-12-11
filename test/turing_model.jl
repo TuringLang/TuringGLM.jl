@@ -6,7 +6,7 @@
         @testset "standardize=false" begin
             normal_model = turing_model(@formula(kid_score ~ mom_iq * mom_hs), kidiq)
             normal_chn = sample(seed!(123), normal_model, NUTS(), MCMCThreads(), 2_000, 2)
-            @test summarystats(normal_chn)[:α, :mean] ≈ 29.30 atol = 0.2
+            @test summarystats(normal_chn)[:α, :mean] ≈ 29.30 atol = 2.0
             @test summarystats(normal_chn)[Symbol("β[1]"), :mean] ≈ 0.533 atol = 0.2
             @test quantile(normal_chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.593 atol = 0.2
         end
@@ -21,7 +21,7 @@
             @test summarystats(normal_chn_std)[:α, :mean] ≈ 0.000 atol = 0.2
             @test summarystats(normal_chn_std)[Symbol("β[1]"), :mean] ≈ 0.648 atol = 0.2
             @test quantile(normal_chn_std)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.849 atol =
-                0.1
+                0.2
         end
 
         @testset "custom_priors" begin
@@ -32,10 +32,10 @@
             normal_chn_prior = sample(
                 seed!(123), normal_model_prior, NUTS(), MCMCThreads(), 2_000, 2
             )
-            @test summarystats(normal_chn_prior)[:α, :mean] ≈ 28.758 atol = 0.2
+            @test summarystats(normal_chn_prior)[:α, :mean] ≈ 28.758 atol = 2.0
             @test summarystats(normal_chn_prior)[Symbol("β[1]"), :mean] ≈ 0.539 atol = 0.2
             @test quantile(normal_chn_prior)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.3863 atol =
-                0.1
+                0.2
         end
     end
     @testset "student likelihood" begin
@@ -47,7 +47,7 @@
             @test summarystats(student_chn)[:α, :mean] ≈ 40.380 atol = 2.0
             @test summarystats(student_chn)[Symbol("β[1]"), :mean] ≈ 0.478 atol = 0.2
             @test quantile(student_chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.736 atol = 0.2
-            @test quantile(student_chn)[:ν, Symbol("50.0%")] ≈ 1.039 atol = 0.2
+            @test quantile(student_chn)[:ν, Symbol("50.0%")] ≈ 1.039 atol = 0.5
         end
 
         @testset "custom_priors" begin
@@ -61,11 +61,11 @@
             student_chn_prior = sample(
                 seed!(123), student_model_prior, NUTS(), MCMCThreads(), 2_000, 2
             )
-            @test summarystats(student_chn_prior)[:α, :mean] ≈ 35.506 atol = 0.2
+            @test summarystats(student_chn_prior)[:α, :mean] ≈ 35.506 atol = 2.0
             @test summarystats(student_chn_prior)[Symbol("β[1]"), :mean] ≈ 0.522 atol = 0.2
             @test quantile(student_chn_prior)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.628 atol =
-                0.1
-            @test quantile(student_chn_prior)[:ν, Symbol("50.0%")] ≈ 1.178 atol = 0.2
+                0.2
+            @test quantile(student_chn_prior)[:ν, Symbol("50.0%")] ≈ 1.178 atol = 0.5
         end
     end
     @testset "bernoulli likelihood" begin
@@ -79,7 +79,7 @@
             @test summarystats(bernoulli_chn)[:α, :mean] ≈ -0.153 atol = 0.2
             @test summarystats(bernoulli_chn)[Symbol("β[1]"), :mean] ≈ 0.467 atol = 0.2
             @test quantile(bernoulli_chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.009 atol =
-                0.1
+                0.2
         end
 
         @testset "custom_priors" begin
@@ -95,9 +95,9 @@
             )
             @test summarystats(bernoulli_chn_prior)[:α, :mean] ≈ -0.155 atol = 0.2
             @test summarystats(bernoulli_chn_prior)[Symbol("β[1]"), :mean] ≈ 0.468 atol =
-                0.1
+                0.2
             @test quantile(bernoulli_chn_prior)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.009 atol =
-                0.1
+                0.2
         end
     end
     @testset "poisson likelihood" begin
@@ -108,7 +108,7 @@
                 family="poisson",
             )
             poisson_chn = sample(seed!(123), poisson_model, NUTS(), MCMCThreads(), 2_000, 2)
-            @test summarystats(poisson_chn)[:α, :mean] ≈ 2.969 atol = 0.2
+            @test summarystats(poisson_chn)[:α, :mean] ≈ 2.969 atol = 0.5
             @test summarystats(poisson_chn)[Symbol("β[1]"), :mean] ≈ 0.006 atol = 0.2
             @test quantile(poisson_chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.5145 atol =
                 0.2
@@ -125,10 +125,10 @@
             poisson_chn_prior = sample(
                 seed!(123), poisson_model_prior, NUTS(), MCMCThreads(), 2_000, 2
             )
-            @test summarystats(poisson_chn_prior)[:α, :mean] ≈ 2.963 atol = 0.2
+            @test summarystats(poisson_chn_prior)[:α, :mean] ≈ 2.963 atol = 0.5
             @test summarystats(poisson_chn_prior)[Symbol("β[1]"), :mean] ≈ 0.006 atol = 0.2
             @test quantile(poisson_chn_prior)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.5145 atol =
-                0.1
+                0.2
         end
     end
     @testset "negative binomial likelihood" begin
@@ -141,7 +141,7 @@
             negativebinomial_chn = sample(
                 seed!(123), negativebinomial_model, NUTS(), MCMCThreads(), 2_000, 2
             )
-            @test summarystats(negativebinomial_chn)[:α, :mean] ≈ 2.448 atol = 0.2
+            @test summarystats(negativebinomial_chn)[:α, :mean] ≈ 2.448 atol = 0.5
             @test summarystats(negativebinomial_chn)[Symbol("β[1]"), :mean] ≈ 0.013 atol =
                 0.2
             @test quantile(negativebinomial_chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.734 atol =
@@ -160,11 +160,11 @@
             negativebinomial_chn_prior = sample(
                 seed!(123), negativebinomial_model_prior, NUTS(), MCMCThreads(), 2_000, 2
             )
-            @test summarystats(negativebinomial_chn_prior)[:α, :mean] ≈ 2.422 atol = 0.2
+            @test summarystats(negativebinomial_chn_prior)[:α, :mean] ≈ 2.422 atol = 0.5
             @test summarystats(negativebinomial_chn_prior)[Symbol("β[1]"), :mean] ≈ 0.013 atol =
                 0.2
             @test quantile(negativebinomial_chn_prior)[Symbol("β[2]"), Symbol("50.0%")] ≈
-                -0.732 atol = 0.1
+                -0.732 atol = 0.2
             @test quantile(negativebinomial_chn_prior)[:ϕ⁻, Symbol("50.0%")] ≈ 3.56 atol =
                 0.2
         end
