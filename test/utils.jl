@@ -36,7 +36,7 @@
             μ_y, σ_y, y_std = T.standardize_predictors(y)
             X = T.data_fixed_effects(f, nt_str)
             μ_X, σ_X, X_std = T.standardize_predictors(X)
-            @test y_std ≈ [-1.16, -0.39, 0.38, 1.16] atol =0.01
+            @test y_std ≈ [-1.16, -0.39, 0.38, 1.16] atol = 0.01
             @test μ_X ≈ [2.547, 0.25, 0.25, 0.25] atol = 0.01
             @test σ_X ≈ [1.114, 0.5, 0.5, 0.5] atol = 0.01
             @test X_std ≈ [

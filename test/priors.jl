@@ -1,5 +1,4 @@
 @testset "prior.jl" begin
-
     @testset "types" begin
         @test DefaultPrior() isa T.Prior
 

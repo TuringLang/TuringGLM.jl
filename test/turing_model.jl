@@ -103,12 +103,15 @@
     @testset "poisson likelihood" begin
         @testset "standardize=false" begin
             poisson_model = turing_model(
-                @formula(y ~ roach1 + treatment + senior + exposure2), roaches; family="poisson"
+                @formula(y ~ roach1 + treatment + senior + exposure2),
+                roaches;
+                family="poisson",
             )
             poisson_chn = sample(seed!(123), poisson_model, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(poisson_chn)[:α, :mean] ≈ 2.969 atol = 0.2
             @test summarystats(poisson_chn)[Symbol("β[1]"), :mean] ≈ 0.006 atol = 0.2
-            @test quantile(poisson_chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.5145 atol = 0.2
+            @test quantile(poisson_chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.5145 atol =
+                0.2
         end
 
         @testset "custom_priors" begin
@@ -131,12 +134,18 @@
     @testset "negative binomial likelihood" begin
         @testset "standardize=false" begin
             negativebinomial_model = turing_model(
-                @formula(y ~ roach1 + treatment + senior + exposure2), roaches; family="negativebinomial"
+                @formula(y ~ roach1 + treatment + senior + exposure2),
+                roaches;
+                family="negativebinomial",
             )
-            negativebinomial_chn = sample(seed!(123), negativebinomial_model, NUTS(), MCMCThreads(), 2_000, 2)
+            negativebinomial_chn = sample(
+                seed!(123), negativebinomial_model, NUTS(), MCMCThreads(), 2_000, 2
+            )
             @test summarystats(negativebinomial_chn)[:α, :mean] ≈ 2.448 atol = 0.2
-            @test summarystats(negativebinomial_chn)[Symbol("β[1]"), :mean] ≈ 0.013 atol = 0.2
-            @test quantile(negativebinomial_chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.734 atol = 0.2
+            @test summarystats(negativebinomial_chn)[Symbol("β[1]"), :mean] ≈ 0.013 atol =
+                0.2
+            @test quantile(negativebinomial_chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.734 atol =
+                0.2
             @test quantile(negativebinomial_chn)[:ϕ⁻, Symbol("50.0%")] ≈ 1.401 atol = 0.2
         end
 
@@ -152,10 +161,12 @@
                 seed!(123), negativebinomial_model_prior, NUTS(), MCMCThreads(), 2_000, 2
             )
             @test summarystats(negativebinomial_chn_prior)[:α, :mean] ≈ 2.422 atol = 0.2
-            @test summarystats(negativebinomial_chn_prior)[Symbol("β[1]"), :mean] ≈ 0.013 atol = 0.2
-            @test quantile(negativebinomial_chn_prior)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.732 atol =
-                0.1
-            @test quantile(negativebinomial_chn_prior)[:ϕ⁻, Symbol("50.0%")] ≈ 3.56 atol = 0.2
+            @test summarystats(negativebinomial_chn_prior)[Symbol("β[1]"), :mean] ≈ 0.013 atol =
+                0.2
+            @test quantile(negativebinomial_chn_prior)[Symbol("β[2]"), Symbol("50.0%")] ≈
+                -0.732 atol = 0.1
+            @test quantile(negativebinomial_chn_prior)[:ϕ⁻, Symbol("50.0%")] ≈ 3.56 atol =
+                0.2
         end
     end
     @testset "NegativeBinomial2" begin
