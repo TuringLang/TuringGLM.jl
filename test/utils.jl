@@ -4,7 +4,7 @@
             f = @formula(y_int ~ x_float + x_cat)
             X = T.data_fixed_effects(f, nt_str)
             μ_X, X_centered = T.center_predictors(X)
-            @test μ_X ≈ [2.547 0.25 0.25 0.25] atol = 0.01
+            @test μ_X ≈ [2.547, 0.25, 0.25, 0.25] atol = 0.01
             @test X_centered ≈ [
                 -1.447 -0.25 -0.25 -0.25
                 -0.247 0.75 -0.25 -0.25
@@ -18,7 +18,7 @@
             f = @formula(y_int ~ x_float + x_cat)
             X = T.data_fixed_effects(f, df_str)
             μ_X, X_centered = T.center_predictors(X)
-            @test μ_X ≈ [2.547 0.25 0.25 0.25] atol = 0.01
+            @test μ_X ≈ [2.547, 0.25, 0.25, 0.25] atol = 0.01
             @test X_centered ≈ [
                 -1.447 -0.25 -0.25 -0.25
                 -0.247 0.75 -0.25 -0.25
@@ -32,10 +32,13 @@
     @testset "standardize_predictors" begin
         @testset "NamedTuples" begin
             f = @formula(y_int ~ x_float + x_cat)
+            y = T.data_response(f, nt_str)
+            μ_y, σ_y, y_std = T.standardize_predictors(y)
             X = T.data_fixed_effects(f, nt_str)
             μ_X, σ_X, X_std = T.standardize_predictors(X)
-            @test μ_X ≈ [2.547 0.25 0.25 0.25] atol = 0.01
-            @test σ_X ≈ [1.114 0.5 0.5 0.5] atol = 0.01
+            @test y_std ≈ [-1.16, -0.39, 0.38, 1.16] atol =0.01
+            @test μ_X ≈ [2.547, 0.25, 0.25, 0.25] atol = 0.01
+            @test σ_X ≈ [1.114, 0.5, 0.5, 0.5] atol = 0.01
             @test X_std ≈ [
                 -1.299 -0.5 -0.5 -0.5
                 -0.222 1.5 -0.5 -0.5
@@ -50,8 +53,8 @@
             f = @formula(y_int ~ x_float + x_cat)
             X = T.data_fixed_effects(f, df_str)
             μ_X, σ_X, X_std = T.standardize_predictors(X)
-            @test μ_X ≈ [2.547 0.25 0.25 0.25] atol = 0.01
-            @test σ_X ≈ [1.114 0.5 0.5 0.5] atol = 0.01
+            @test μ_X ≈ [2.547, 0.25, 0.25, 0.25] atol = 0.01
+            @test σ_X ≈ [1.114, 0.5, 0.5, 0.5] atol = 0.01
             @test X_std ≈ [
                 -1.299 -0.5 -0.5 -0.5
                 -0.222 1.5 -0.5 -0.5

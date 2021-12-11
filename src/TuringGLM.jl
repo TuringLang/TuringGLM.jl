@@ -1,8 +1,9 @@
 module TuringGLM
 
 import Base: ==, length
+using LinearAlgebra: I
 using Statistics: mean, median, std
-using StatsBase: mad
+using StatsBase: mad, coefnames
 using StatsModels: ConstantTerm, FormulaTerm, FunctionTerm, Term
 using StatsModels: hasintercept, response, term
 using MixedModels: MixedModel, RandomEffectsTerm, ZeroCorr
