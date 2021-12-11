@@ -207,7 +207,7 @@ function turing_model(
 end
 
 """
-    NegativeBinomial2(μ, σ)
+    NegativeBinomial2(μ, ϕ)
 
 An alternative parameterization of the Negative Binomial distribution:
 
