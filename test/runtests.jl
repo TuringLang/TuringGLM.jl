@@ -1,5 +1,6 @@
 using TuringGLM
 using Test
+using CSV
 using DataFrames
 using CategoricalArrays: CategoricalValue
 using CategoricalArrays: categorical, levels
@@ -30,6 +31,6 @@ df_cat = DataFrame(nt_cat)
 @testset "TuringGLM.jl" begin
     include("data_constructors.jl")
     include("utils.jl")
-    include("canonicallink.jl")
+    include("priors.jl")
     include("turing_model.jl")
 end

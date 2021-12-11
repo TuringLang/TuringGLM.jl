@@ -1,7 +1,8 @@
 module TuringGLM
 
 import Base: ==, length
-using Statistics: mean, std
+using Statistics: mean, median, std
+using StatsBase: mad
 using StatsModels: ConstantTerm, FormulaTerm, FunctionTerm, Term
 using StatsModels: hasintercept, response, term
 using MixedModels: MixedModel, RandomEffectsTerm, ZeroCorr
@@ -18,13 +19,16 @@ using TableOperations: TableOperations
 # LazyArrays
 using LazyArrays: @~, LazyArray
 
+# Distributions
+using Distributions: UnivariateDistribution
+
 using Reexport: @reexport
 
 @reexport begin
     using Turing
     using StatsModels: @formula
     using MixedModels: zerocorr
-    using GLM: # Distributions
+    using Distributions:
         Bernoulli,
         Binomial,
         Gamma,
@@ -33,25 +37,14 @@ using Reexport: @reexport
         Normal,
         Poisson,
         TDist
-    using GLM: # Link
-        Link,
-        CauchitLink,
-        CloglogLink,
-        IdentityLink,
-        InverseLink,
-        InverseSquareLink,
-        LogitLink,
-        LogLink,
-        NegativeBinomialLink,
-        ProbitLink,
-        SqrtLink
-    using GLM: canonicallink  # canonical link function for a distribution
 end
 
 include("utils.jl")
 include("data_constructors.jl")
+include("priors.jl")
 include("turing_model.jl")
 
 export turing_model
+export CustomPrior, DefaultPrior
 
 end # module
