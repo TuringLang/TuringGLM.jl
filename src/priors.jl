@@ -2,11 +2,6 @@ abstract type Prior end
 
 struct DefaultPrior <: Prior end
 
-function DefaultPrior(x...)
-    throw(ArgumentError("DefaultPrior accepts no parameters, please use CustomPrior"))
-    return nothing
-end
-
 """
     CustomPrior(predictors, intercept, auxiliary)
 
