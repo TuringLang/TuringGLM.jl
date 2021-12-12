@@ -10,7 +10,7 @@
     end
 
     @testset "constructors" begin
-        @test_throws ArgumentError DefaultPrior(Normal(0, 1))
+        @test_throws MethodError DefaultPrior(Normal(0, 1))
         @test_throws ArgumentError CustomPrior()
     end
 
