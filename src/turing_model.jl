@@ -121,13 +121,15 @@ function turing_model(
     end
 end
 
-turing_model(
+function turing_model(
     formula::FormulaTerm,
     data::D,
     model::Gaussian;
-    priors::Prior = DefaultPrior(),
-    standardize::Bool = false,
-   ) where {D} = turing_model(formula, data; priors, standardize)
+    priors::Prior=DefaultPrior(),
+    standardize::Bool=false,
+) where {D}
+    return turing_model(formula, data; priors, standardize)
+end
 
 function turing_model(
     formula::FormulaTerm, data::D, model::Student; priors=DefaultPrior(), standardize=false
