@@ -1,5 +1,5 @@
 """
-    turing_model(formula, data; family=Normal, priors=DefaultPrior(), standardize=false)
+    turing_model(formula, data; model=Gaussian, priors=DefaultPrior(), standardize=false)
 
 Create a Turing model using `formula` syntax and a `data` source.
 
@@ -28,17 +28,16 @@ TODO: add random-effects.
 `data` can be any `Tables.jl`-compatible data interface. The most popular ones are DataFrames
 and NamedTuples.
 
-# `family`
+# `model`
 
-`family` represents the likelihood function which you want to condition your data on.
-Must be specified using a `String`.
+`model` represents the likelihood function which you want to condition your data on.
 Currently, `TuringGLM.jl` supports:
 
-* `"normal"` (the default)
-* `"student"`
-* `"bernoulli"`
-* `"poisson"`
-* `"negativebinomial"`
+* `Gaussian()` (the default): linear regression
+* `Student()`: robust linear regression
+* `Logistic()`: logistic regression
+* `Pois()`: Poisson count data regression
+* `NegBin()`: negative binomial robust count data regression
 
 # `priors`
 
@@ -69,9 +68,70 @@ standard devations. Also, whenever measurement scales differs, it is often sugge
 standardize the effects for better comparison. By default, `turing_model` sets `standardize=false`.
 """
 function turing_model(
-    formula::FormulaTerm, data::D; family="normal", priors=DefaultPrior(), standardize=false
+    formula::FormulaTerm,
+    data::D;
+    model=Gaussian(),
+    priors=DefaultPrior(),
+    standardize=false,
 ) where {D}
 
+    # extract y, X and Z
+    y = data_response(formula, data)
+    X = data_fixed_effects(formula, data)
+    Z = data_random_effects(formula, data)
+
+    # μ and σ identities
+    μ_X = 0
+    σ_X = 1
+    μ_y = 0
+    σ_y = 1
+
+    if standardize
+        μ_X, σ_X, X = standardize_predictors(X)
+        μ_y, σ_y, y = standardize_predictors(y)
+    end
+
+    # Random-Effects Conditionals
+    if has_ranef(formula)
+        # TODO
+    else
+        if priors isa DefaultPrior
+            custom_prior = CustomPrior(
+                TDist(3), LocationScale(median(y), mad(y), TDist(3)), nothing
+            )
+        else
+            custom_prior = priors
+        end
+        @model function normal_model(
+            y,
+            X;
+            predictors=size(X, 2),
+            μ_X=μ_X,
+            σ_X=σ_X,
+            prior=custom_prior,
+            residual=1 / std(y),
+        )
+            α ~ prior.intercept
+            β ~ filldist(prior.predictors, predictors)
+            σ ~ Exponential(residual)
+            y ~ MvNormal(α .+ X * β, σ^2 * I)
+            return (; α, β, σ, y)
+        end
+        return normal_model(y, X)
+    end
+end
+
+turing_model(
+    formula::FormulaTerm,
+    data::D,
+    model::Gaussian;
+    priors::Prior = DefaultPrior(),
+    standardize::Bool = false,
+   ) where {D} = turing_model(formula, data; priors, standardize)
+
+function turing_model(
+    formula::FormulaTerm, data::D, model::Student; priors=DefaultPrior(), standardize=false
+) where {D}
     # extract y, X and Z
     y = data_response(formula, data)
     X = data_fixed_effects(formula, data)
@@ -93,119 +153,171 @@ function turing_model(
         # Likelihood Conditionals
         # TODO
     else
-        # Likelihood Conditionals
-        if family == "normal"
-            if priors isa DefaultPrior
-                custom_prior = CustomPrior(
-                    TDist(3), LocationScale(median(y), mad(y), TDist(3)), nothing
-                )
-            else
-                custom_prior = priors
-            end
-            @model function normal_model(
-                y,
-                X;
-                predictors=size(X, 2),
-                μ_X=μ_X,
-                σ_X=σ_X,
-                prior=custom_prior,
-                residual=1 / std(y),
+        if priors isa DefaultPrior
+            custom_prior = CustomPrior(
+                TDist(3), LocationScale(median(y), mad(y), TDist(3)), Gamma(2, 0.1)
             )
-                α ~ prior.intercept
-                β ~ filldist(prior.predictors, predictors)
-                σ ~ Exponential(residual)
-                y ~ MvNormal(α .+ X * β, σ^2 * I)
-                return (; α, β, σ, y)
-            end
-            return normal_model(y, X)
-        elseif family == "student"
-            if priors isa DefaultPrior
-                custom_prior = CustomPrior(
-                    TDist(3), LocationScale(median(y), mad(y), TDist(3)), Gamma(2, 0.1)
-                )
-            else
-                custom_prior = priors
-            end
-            @model function student_model(
-                y,
-                X;
-                predictors=size(X, 2),
-                μ_X=μ_X,
-                σ_X=σ_X,
-                prior=custom_prior,
-                residual=1 / std(y),
-            )
-                α ~ prior.intercept
-                β ~ filldist(prior.predictors, predictors)
-                σ ~ Exponential(residual)
-                ν ~ prior.auxiliary
-                y ~ arraydist(LocationScale.(α .+ X * β, σ, TDist.(ν)))
-                return (; α, β, σ, ν, y)
-            end
-            return student_model(y, X)
-        elseif family == "bernoulli"
-            if priors isa DefaultPrior
-                custom_prior = CustomPrior(
-                    TDist(3), LocationScale(0, 2.5, TDist(3)), nothing
-                )
-            else
-                custom_prior = priors
-            end
-            @model function bernoulli_model(
-                y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=custom_prior
-            )
-                α ~ prior.intercept
-                β ~ filldist(prior.predictors, predictors)
-                y ~ arraydist(LazyArray(@~ BernoulliLogit.(α .+ X * β)))
-                return (; α, β, y)
-            end
-            return bernoulli_model(y, X)
-        elseif family == "poisson"
-            if priors isa DefaultPrior
-                custom_prior = CustomPrior(
-                    TDist(3), LocationScale(median(y), mad(y), TDist(3)), nothing
-                )
-            else
-                custom_prior = priors
-            end
-            @model function poisson_model(
-                y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=custom_prior
-            )
-                α ~ prior.intercept
-                β ~ filldist(prior.predictors, predictors)
-                y ~ arraydist(LazyArray(@~ LogPoisson.(α .+ X * β)))
-                return (; α, β, y)
-            end
-            return poisson_model(y, X; predictors=size(X, 2))
-        elseif family == "negativebinomial"
-            if priors isa DefaultPrior
-                custom_prior = CustomPrior(
-                    TDist(3), LocationScale(median(y), mad(y), TDist(3)), Gamma(0.01, 0.01)
-                )
-            else
-                custom_prior = priors
-            end
-            @model function negbin_model(
-                y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=custom_prior
-            )
-                α ~ prior.intercept
-                β ~ filldist(prior.predictors, predictors)
-                ϕ⁻ ~ prior.auxiliary
-                ϕ = 1 / ϕ⁻
-                y ~ arraydist(LazyArray(@~ NegativeBinomial2.(exp.(α .+ X * β), ϕ)))
-                return (; α, β, ϕ, y)
-            end
-            return negbin_model(y, X)
         else
-            throw(
-                ArgumentError(
-                    "Could not find $(family) likelihood. Please check the documentation for supported likelihoods.",
-                ),
-            )
+            custom_prior = priors
         end
+        @model function student_model(
+            y,
+            X;
+            predictors=size(X, 2),
+            μ_X=μ_X,
+            σ_X=σ_X,
+            prior=custom_prior,
+            residual=1 / std(y),
+        )
+            α ~ prior.intercept
+            β ~ filldist(prior.predictors, predictors)
+            σ ~ Exponential(residual)
+            ν ~ prior.auxiliary
+            y ~ arraydist(LocationScale.(α .+ X * β, σ, TDist.(ν)))
+            return (; α, β, σ, ν, y)
+        end
+        return student_model(y, X)
     end
 end
 
+function turing_model(
+    formula::FormulaTerm, data::D, model::Logistic; priors=DefaultPrior(), standardize=false
+) where {D}
+    # extract y, X and Z
+    y = data_response(formula, data)
+    X = data_fixed_effects(formula, data)
+    Z = data_random_effects(formula, data)
+
+    # μ and σ identities
+    μ_X = 0
+    σ_X = 1
+    μ_y = 0
+    σ_y = 1
+
+    if standardize
+        μ_X, σ_X, X = standardize_predictors(X)
+        μ_y, σ_y, y = standardize_predictors(y)
+    end
+
+    # Random-Effects Conditionals
+    if has_ranef(formula)
+        # TODO
+    else
+        if priors isa DefaultPrior
+            custom_prior = CustomPrior(TDist(3), LocationScale(0, 2.5, TDist(3)), nothing)
+        else
+            custom_prior = priors
+        end
+        @model function bernoulli_model(
+            y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=custom_prior
+        )
+            α ~ prior.intercept
+            β ~ filldist(prior.predictors, predictors)
+            y ~ arraydist(LazyArray(@~ BernoulliLogit.(α .+ X * β)))
+            return (; α, β, y)
+        end
+        return bernoulli_model(y, X)
+    end
+end
+function turing_model(
+    formula::FormulaTerm, data::D, model::Pois; priors=DefaultPrior(), standardize=false
+) where {D}
+    # extract y, X and Z
+    y = data_response(formula, data)
+    X = data_fixed_effects(formula, data)
+    Z = data_random_effects(formula, data)
+
+    # μ and σ identities
+    μ_X = 0
+    σ_X = 1
+    μ_y = 0
+    σ_y = 1
+
+    if standardize
+        μ_X, σ_X, X = standardize_predictors(X)
+        μ_y, σ_y, y = standardize_predictors(y)
+    end
+
+    # Random-Effects Conditionals
+    if has_ranef(formula)
+        # TODO
+    else
+        if priors isa DefaultPrior
+            custom_prior = CustomPrior(
+                TDist(3), LocationScale(median(y), mad(y), TDist(3)), nothing
+            )
+        else
+            custom_prior = priors
+        end
+        @model function poisson_model(
+            y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=custom_prior
+        )
+            α ~ prior.intercept
+            β ~ filldist(prior.predictors, predictors)
+            y ~ arraydist(LazyArray(@~ LogPoisson.(α .+ X * β)))
+            return (; α, β, y)
+        end
+        return poisson_model(y, X; predictors=size(X, 2))
+    end
+end
+
+function turing_model(
+    formula::FormulaTerm, data::D, model::NegBin; priors=DefaultPrior(), standardize=false
+) where {D}
+    # extract y, X and Z
+    y = data_response(formula, data)
+    X = data_fixed_effects(formula, data)
+    Z = data_random_effects(formula, data)
+
+    # μ and σ identities
+    μ_X = 0
+    σ_X = 1
+    μ_y = 0
+    σ_y = 1
+
+    if standardize
+        μ_X, σ_X, X = standardize_predictors(X)
+        μ_y, σ_y, y = standardize_predictors(y)
+    end
+
+    # Random-Effects Conditionals
+    if has_ranef(formula)
+        # TODO
+    else
+        if priors isa DefaultPrior
+            custom_prior = CustomPrior(
+                TDist(3), LocationScale(median(y), mad(y), TDist(3)), Gamma(0.01, 0.01)
+            )
+        else
+            custom_prior = priors
+        end
+        @model function negbin_model(
+            y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=custom_prior
+        )
+            α ~ prior.intercept
+            β ~ filldist(prior.predictors, predictors)
+            ϕ⁻ ~ prior.auxiliary
+            ϕ = 1 / ϕ⁻
+            y ~ arraydist(LazyArray(@~ NegativeBinomial2.(exp.(α .+ X * β), ϕ)))
+            return (; α, β, ϕ, y)
+        end
+        return negbin_model(y, X)
+    end
+end
+
+function turing_model(
+    formula::FormulaTerm,
+    data::D,
+    model::Union{UnivariateDistribution,Model},
+    priors=DefaultPrior(),
+    standardize=false,
+) where {D}
+    return throw(
+        ArgumentError(
+            "Could not find $(model) likelihood. Please check the documentation for supported likelihoods.",
+        ),
+    )
+end
 """
     NegativeBinomial2(μ, ϕ)
 
