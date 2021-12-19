@@ -1,5 +1,6 @@
 """
-    turing_model(formula, data; model=Gaussian, priors=DefaultPrior(), standardize=false)
+    turing_model(formula, data; model=Gaussian(), priors=DefaultPrior(), standardize=false)
+    turing_model(formula, data, model; priors=DefaultPrior(), standardize=false)
 
 Create a Turing model using `formula` syntax and a `data` source.
 
@@ -33,7 +34,7 @@ and NamedTuples.
 `model` represents the likelihood function which you want to condition your data on.
 Currently, `TuringGLM.jl` supports:
 
-* `Gaussian()` (the default): linear regression
+* `Gaussian()` (the default if not specified): linear regression
 * `Student()`: robust linear regression
 * `Logistic()`: logistic regression
 * `Pois()`: Poisson count data regression
