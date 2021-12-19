@@ -222,6 +222,7 @@ function turing_model(
         return bernoulli_model(y, X)
     end
 end
+
 function turing_model(
     formula::FormulaTerm, data::D, model::Pois; priors=DefaultPrior(), standardize=false
 ) where {D}
