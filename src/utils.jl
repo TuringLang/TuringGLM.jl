@@ -19,7 +19,7 @@ function center_predictors(X::AbstractMatrix)
     for (idx, val) in enumerate(eachcol(X))
         X_centered[:, idx] = val .- μ_X[1, idx]
     end
-    return μ_X, X_centered
+    return vec(μ_X), X_centered
 end
 
 """
@@ -46,7 +46,28 @@ function standardize_predictors(X::AbstractMatrix)
     for (idx, val) in enumerate(eachcol(X))
         X_std[:, idx] = (val .- μ_X[1, idx]) ./ σ_X[1, idx]
     end
-    return μ_X, σ_X, X_std
+    return vec(μ_X), vec(σ_X), X_std
+end
+
+"""
+    standardize_predictors(x::AbstractVector)
+
+Standardizes the vector `x` to mean 0 and standard deviation 1.
+
+Returns a tuple with:
+1. `μ_X`: `Float64`s of the mean of the original vector `x`.
+2. `σ_X`: `Float64`s of the standard deviations of the original vector `x`.
+3. `x_std`: A `Vector` of `Float64`s with the same length as the original vector
+`x` with the values centered on mean μ=0 and standard deviation σ=1.
+
+# Arguments
+- `x::AbstractVector`: a vector.
+"""
+function standardize_predictors(x::AbstractVector)
+    μ_x = mean(x)
+    σ_x = std(x)
+    x_std = (x .- μ_x) ./ σ_x
+    return μ_x, σ_x, x_std
 end
 
 """

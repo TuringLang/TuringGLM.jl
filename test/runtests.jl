@@ -1,9 +1,11 @@
 using TuringGLM
 using Test
+using CSV
 using DataFrames
 using CategoricalArrays: CategoricalValue
 using CategoricalArrays: categorical, levels
 using Statistics: mean, std
+using Random: seed!
 
 const T = TuringGLM
 
@@ -30,4 +32,6 @@ df_cat = DataFrame(nt_cat)
 @testset "TuringGLM.jl" begin
     include("data_constructors.jl")
     include("utils.jl")
+    include("priors.jl")
+    include("turing_model.jl")
 end
