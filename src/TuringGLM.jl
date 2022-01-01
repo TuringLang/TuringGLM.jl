@@ -6,8 +6,7 @@ using Statistics: mean, median, std
 using StatsBase: mad, coefnames
 using StatsModels: ConstantTerm, FormulaTerm, FunctionTerm, Term
 using StatsModels: hasintercept, response, term
-using MixedModels: MixedModel, RandomEffectsTerm, ZeroCorr
-using MixedModels: zerocorr
+using MixedModels: MixedModel, RandomEffectsTerm
 
 # Different modelmatrix
 using MixedModels: MixedModels
@@ -28,7 +27,6 @@ using Reexport: @reexport
 @reexport begin
     using Turing
     using StatsModels: @formula
-    using MixedModels: zerocorr
     using Distributions:
         Bernoulli,
         Binomial,

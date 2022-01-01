@@ -94,7 +94,53 @@ function turing_model(
 
     # Random-Effects Conditionals
     if has_ranef(formula)
-        # TODO
+        if priors isa DefaultPrior
+            custom_prior = CustomPrior(
+                TDist(3), LocationScale(median(y), mad(y), TDist(3)), nothing
+            )
+        else
+            custom_prior = priors
+        end
+        intercept_ranef = intercept_per_ranef(ranef(formula))
+        group_var = first(ranef(formula)).rhs
+        idx = get_idx(term(group_var), data)
+        # print for the user the idx
+        println("The idx are $(last(idx))\n")
+        @model function normal_model(
+            y,
+            X,
+            Z;
+            predictors=size(X, 2),
+            idxs=first(idx),
+            n_gr=length(unique(first(idx))),
+            intercept_ranef=intercept_ranef,
+            μ_X=μ_X,
+            σ_X=σ_X,
+            prior=custom_prior,
+            residual=1 / std(y),
+        )
+            α ~ prior.intercept
+            β ~ filldist(prior.predictors, predictors)
+            σ ~ Exponential(residual)
+            μ = α .+ X * β
+            if !isempty(intercept_ranef)
+                τ ~ LocationScale(0, mad(y), truncated(TDist(3), 0, Inf))
+                zⱼ ~ filldist(Normal(), n_gr)
+                μ .+= zⱼ[idxs]
+            end
+            if !isnothing(Z)
+                τₛ ~ filldist(
+                    LocationalScale(0, mad(y), truncated(TDist(3), 0, Inf)), length(Z)
+                )
+                for (i, v) in values(Z)
+                    zₛ ~ filldist(Normal(), n_gr)
+                    μ .+= zₛ[idxs] .* τ[i] .* v[i]
+                end
+            end
+            y ~ MvNormal(μ, σ^2 * I)
+            return (; α, β, σ, τ, zⱼ, y)
+        end
+        return normal_model(y, X, Z)
     else
         if priors isa DefaultPrior
             custom_prior = CustomPrior(
