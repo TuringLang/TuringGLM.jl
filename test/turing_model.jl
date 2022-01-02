@@ -2,6 +2,7 @@
     kidiq = CSV.read(joinpath("..", "data", "kidiq.csv"), DataFrame)
     wells = CSV.read(joinpath("..", "data", "wells.csv"), DataFrame)
     roaches = CSV.read(joinpath("..", "data", "roaches.csv"), DataFrame)
+    cheese = CSV.read(joinpath("..", "data", "cheese.csv"), DataFrame)
     @testset "Gaussian Model" begin
         f = @formula(kid_score ~ mom_iq * mom_hs)
         @testset "standardize=false" begin
@@ -115,6 +116,15 @@
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.732 atol = 0.2
             @test quantile(chn)[:ϕ⁻, Symbol("50.0%")] ≈ 3.56 atol = 0.2
         end
+    end
+    @testset "Hierarchical Model" begin
+        f = @formula(y ~ (1 | cheese) + background)
+        m = turing_model(f, cheese)
+            chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            @test summarystats(chn)[:α, :mean] ≈ 68.33 atol = 2.0
+            @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 6.928 atol = 0.2
+            @test summarystats(chn)[Symbol("zⱼ[1]"), :mean] ≈ 0.306 atol = 0.2
+            @test quantile(chn)[Symbol("zⱼ[2]"), Symbol("50.0%")] ≈ -1.422 atol = 0.5
     end
     @testset "Unsupported Model Likelihoods" begin
         @test_throws ArgumentError turing_model(@formula(y ~ x), nt_str, Normal())
