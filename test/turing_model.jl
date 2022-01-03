@@ -1,5 +1,5 @@
 @testset "turing_model.jl" begin
-    const DATA_DIR = joinpath("..", "data")
+    DATA_DIR = joinpath("..", "data")
     kidiq = CSV.read(joinpath(DATA_DIR, "kidiq.csv"), DataFrame)
     wells = CSV.read(joinpath(DATA_DIR, "wells.csv"), DataFrame)
     roaches = CSV.read(joinpath(DATA_DIR, "roaches.csv"), DataFrame)
