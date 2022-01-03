@@ -13,7 +13,7 @@ Create a Turing model using `formula` syntax and a `data` source.
 [`StatsModels.jl`](https://juliastats.org/StatsModels.jl/latest/) and
 [`MixedModels.jl`](https://juliastats.org/MixedModels.jl/dev/).
 The syntax is done by using the `@formula` macro and then specifying the dependent variable
-followed by a tilde `~` then the indepedent variables separated by a plus sign `+`.
+followed by a tilde `~` then the independent variables separated by a plus sign `+`.
 
 Example: `@formula(y ~ x1 + x2 + x3)`.
 
@@ -22,7 +22,16 @@ This will be expanded to `x1 + x2 + x1:x2`, which, following the principle of hi
 the main effects must also be added along with the interaction effects. Here `x1:x2`
 means that the values of `x1` will be multiplied (interacted) with the values of `x2`.
 
-TODO: add random-effects.
+Random-effects (a.k.a. group-level effects) can be specified with the `(term | group)` inside
+the `@formula`, where `term` is the independent variable and `group` is the **categorical**
+representation (i.e., either a column of `String`s or a `CategoricalArray` in `data`).
+You can specify a random-intercept with `(1 | group)`.
+
+Example: `@formula(y ~ (1 | group) + x1)`.
+
+**Notice: random-effects are currently only implemented for a single group-level intercept.
+Future versions of `TuringGLM.jl` will support slope random-effects and multiple group-level
+effets.**
 
 # `data`
 
@@ -90,11 +99,57 @@ function turing_model(
     if standardize
         μ_X, σ_X, X = standardize_predictors(X)
         μ_y, σ_y, y = standardize_predictors(y)
+        if !isnothing(Z)
+            #TODO: implement random-effects slope
+            throw(
+                ArgumentError(
+                    "TuringGLM currently does not support random-effects for slope terms"
+                ),
+            )
+        end
     end
 
     # Random-Effects Conditionals
     if has_ranef(formula)
-        # TODO
+        if priors isa DefaultPrior
+            custom_prior = CustomPrior(
+                TDist(3), LocationScale(median(y), mad(y), TDist(3)), nothing
+            )
+        else
+            custom_prior = priors
+        end
+        intercept_ranef = intercept_per_ranef(ranef(formula))
+        group_var = first(ranef(formula)).rhs
+        idx = get_idx(term(group_var), data)
+        # print for the user the idx
+        println("The idx are $(last(idx))\n")
+        @model function normal_model_ranef(
+            y,
+            X;
+            predictors=size(X, 2),
+            idxs=first(idx),
+            n_gr=length(unique(first(idx))),
+            intercept_ranef=intercept_ranef,
+            μ_X=μ_X,
+            σ_X=σ_X,
+            prior=custom_prior,
+            residual=1 / std(y),
+        )
+            α ~ prior.intercept
+            β ~ filldist(prior.predictors, predictors)
+            σ ~ Exponential(residual)
+            μ = α .+ X * β
+            if !isempty(intercept_ranef)
+                τ ~ LocationScale(0, mad(y), truncated(TDist(3), 0, Inf))
+                zⱼ ~ filldist(Normal(), n_gr)
+                αⱼ = zⱼ .* τ
+                μ .+= αⱼ[idxs]
+            end
+            #TODO: implement random-effects slope
+            y ~ MvNormal(μ, σ^2 * I)
+            return (; α, β, σ, τ, zⱼ, αⱼ, y)
+        end
+        return normal_model_ranef(y, X)
     else
         if priors isa DefaultPrior
             custom_prior = CustomPrior(
@@ -149,12 +204,55 @@ function turing_model(
     if standardize
         μ_X, σ_X, X = standardize_predictors(X)
         μ_y, σ_y, y = standardize_predictors(y)
+        if !isnothing(Z)
+            #TODO: implement random-effects slope
+            msg = "TuringGLM currently does not support random-effects for slope terms"
+            throw(ArgumentError(msg))
+        end
     end
 
     # Random-Effects Conditionals
     if has_ranef(formula)
-        # Likelihood Conditionals
-        # TODO
+        if priors isa DefaultPrior
+            custom_prior = CustomPrior(
+                TDist(3), LocationScale(median(y), mad(y), TDist(3)), Gamma(2, 0.1)
+            )
+        else
+            custom_prior = priors
+        end
+        intercept_ranef = intercept_per_ranef(ranef(formula))
+        group_var = first(ranef(formula)).rhs
+        idx = get_idx(term(group_var), data)
+        # print for the user the idx
+        println("The idx are $(last(idx))\n")
+        @model function student_model_ranef(
+            y,
+            X;
+            predictors=size(X, 2),
+            idxs=first(idx),
+            n_gr=length(unique(first(idx))),
+            intercept_ranef=intercept_ranef,
+            μ_X=μ_X,
+            σ_X=σ_X,
+            prior=custom_prior,
+            residual=1 / std(y),
+        )
+            α ~ prior.intercept
+            β ~ filldist(prior.predictors, predictors)
+            σ ~ Exponential(residual)
+            ν ~ prior.auxiliary
+            μ = α .+ X * β
+            if !isempty(intercept_ranef)
+                τ ~ LocationScale(0, mad(y), truncated(TDist(3), 0, Inf))
+                zⱼ ~ filldist(Normal(), n_gr)
+                αⱼ = zⱼ .* τ
+                μ .+= αⱼ[idxs]
+            end
+            #TODO: implement random-effects slope
+            y ~ arraydist(LocationScale.(μ, σ, TDist.(ν)))
+            return (; α, β, σ, ν, τ, zⱼ, αⱼ, y)
+        end
+        return student_model_ranef(y, X)
     else
         if priors isa DefaultPrior
             custom_prior = CustomPrior(
@@ -200,11 +298,53 @@ function turing_model(
     if standardize
         μ_X, σ_X, X = standardize_predictors(X)
         μ_y, σ_y, y = standardize_predictors(y)
+        if !isnothing(Z)
+            #TODO: implement random-effects slope
+            throw(
+                ArgumentError(
+                    "TuringGLM currently does not support random-effects for slope terms"
+                ),
+            )
+        end
     end
 
     # Random-Effects Conditionals
     if has_ranef(formula)
-        # TODO
+        if priors isa DefaultPrior
+            custom_prior = CustomPrior(TDist(3), LocationScale(0, 2.5, TDist(3)), nothing)
+        else
+            custom_prior = priors
+        end
+        intercept_ranef = intercept_per_ranef(ranef(formula))
+        group_var = first(ranef(formula)).rhs
+        idx = get_idx(term(group_var), data)
+        # print for the user the idx
+        println("The idx are $(last(idx))\n")
+        @model function bernoulli_model_ranef(
+            y,
+            X;
+            predictors=size(X, 2),
+            idxs=first(idx),
+            n_gr=length(unique(first(idx))),
+            intercept_ranef=intercept_ranef,
+            μ_X=μ_X,
+            σ_X=σ_X,
+            prior=custom_prior,
+        )
+            α ~ prior.intercept
+            β ~ filldist(prior.predictors, predictors)
+            μ = α .+ X * β
+            if !isempty(intercept_ranef)
+                τ ~ LocationScale(0, mad(y), truncated(TDist(3), 0, Inf))
+                zⱼ ~ filldist(Normal(), n_gr)
+                αⱼ = zⱼ .* τ
+                μ .+= αⱼ[idxs]
+            end
+            #TODO: implement random-effects slope
+            y ~ arraydist(LazyArray(@~ BernoulliLogit.(μ)))
+            return (; α, β, τ, zⱼ, αⱼ, y)
+        end
+        return bernoulli_model_ranef(y, X)
     else
         if priors isa DefaultPrior
             custom_prior = CustomPrior(TDist(3), LocationScale(0, 2.5, TDist(3)), nothing)
@@ -240,16 +380,56 @@ function turing_model(
     if standardize
         μ_X, σ_X, X = standardize_predictors(X)
         μ_y, σ_y, y = standardize_predictors(y)
+        if !isnothing(Z)
+            #TODO: implement random-effects slope
+            throw(
+                ArgumentError(
+                    "TuringGLM currently does not support random-effects for slope terms"
+                ),
+            )
+        end
     end
 
     # Random-Effects Conditionals
     if has_ranef(formula)
-        # TODO
+        if priors isa DefaultPrior
+            custom_prior = CustomPrior(TDist(3), LocationScale(0, 2.5, TDist(3)), nothing)
+        else
+            custom_prior = priors
+        end
+        intercept_ranef = intercept_per_ranef(ranef(formula))
+        group_var = first(ranef(formula)).rhs
+        idx = get_idx(term(group_var), data)
+        # print for the user the idx
+        println("The idx are $(last(idx))\n")
+        @model function poisson_model_ranef(
+            y,
+            X;
+            predictors=size(X, 2),
+            idxs=first(idx),
+            n_gr=length(unique(first(idx))),
+            intercept_ranef=intercept_ranef,
+            μ_X=μ_X,
+            σ_X=σ_X,
+            prior=custom_prior,
+        )
+            α ~ prior.intercept
+            β ~ filldist(prior.predictors, predictors)
+            μ = α .+ X * β
+            if !isempty(intercept_ranef)
+                τ ~ LocationScale(0, mad(y), truncated(TDist(3), 0, Inf))
+                zⱼ ~ filldist(Normal(), n_gr)
+                αⱼ = zⱼ .* τ
+                μ .+= αⱼ[idxs]
+            end
+            #TODO: implement random-effects slope
+            y ~ arraydist(LazyArray(@~ LogPoisson.(μ)))
+            return (; α, β, τ, zⱼ, αⱼ, y)
+        end
+        return poisson_model_ranef(y, X)
     else
         if priors isa DefaultPrior
-            custom_prior = CustomPrior(
-                TDist(3), LocationScale(median(y), mad(y), TDist(3)), nothing
-            )
+            custom_prior = CustomPrior(TDist(3), LocationScale(0, 2.5, TDist(3)), nothing)
         else
             custom_prior = priors
         end
@@ -261,7 +441,7 @@ function turing_model(
             y ~ arraydist(LazyArray(@~ LogPoisson.(α .+ X * β)))
             return (; α, β, y)
         end
-        return poisson_model(y, X; predictors=size(X, 2))
+        return poisson_model(y, X)
     end
 end
 
@@ -282,15 +462,61 @@ function turing_model(
     if standardize
         μ_X, σ_X, X = standardize_predictors(X)
         μ_y, σ_y, y = standardize_predictors(y)
+        if !isnothing(Z)
+            #TODO: implement random-effects slope
+            throw(
+                ArgumentError(
+                    "TuringGLM currently does not support random-effects for slope terms"
+                ),
+            )
+        end
     end
 
     # Random-Effects Conditionals
     if has_ranef(formula)
-        # TODO
+        if priors isa DefaultPrior
+            custom_prior = CustomPrior(
+                TDist(3), LocationScale(0, 2.5, TDist(3)), Gamma(0.01, 0.01)
+            )
+        else
+            custom_prior = priors
+        end
+        intercept_ranef = intercept_per_ranef(ranef(formula))
+        group_var = first(ranef(formula)).rhs
+        idx = get_idx(term(group_var), data)
+        # print for the user the idx
+        println("The idx are $(last(idx))\n")
+        @model function negbin_model_ranef(
+            y,
+            X;
+            predictors=size(X, 2),
+            idxs=first(idx),
+            n_gr=length(unique(first(idx))),
+            intercept_ranef=intercept_ranef,
+            μ_X=μ_X,
+            σ_X=σ_X,
+            prior=custom_prior,
+        )
+            α ~ prior.intercept
+            β ~ filldist(prior.predictors, predictors)
+            ϕ⁻ ~ prior.auxiliary
+            ϕ = 1 / ϕ⁻
+            μ = α .+ X * β
+            if !isempty(intercept_ranef)
+                τ ~ LocationScale(0, mad(y), truncated(TDist(3), 0, Inf))
+                zⱼ ~ filldist(Normal(), n_gr)
+                αⱼ = zⱼ .* τ
+                μ .+= αⱼ[idxs]
+            end
+            #TODO: implement random-effects slope
+            y ~ arraydist(LazyArray(@~ NegativeBinomial2.(exp.(μ), ϕ)))
+            return (; α, β, ϕ, τ, zⱼ, αⱼ, y)
+        end
+        return negbin_model_ranef(y, X)
     else
         if priors isa DefaultPrior
             custom_prior = CustomPrior(
-                TDist(3), LocationScale(median(y), mad(y), TDist(3)), Gamma(0.01, 0.01)
+                TDist(3), LocationScale(0, 2.5, TDist(3)), Gamma(0.01, 0.01)
             )
         else
             custom_prior = priors

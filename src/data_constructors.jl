@@ -65,8 +65,6 @@ predictors slope variables (keys) in the `formula` and present inside `data`.
 [Tables.jl](https://github.com/JuliaData/Tables.jl) interface such as a DataFrame.
 """
 function data_random_effects(formula::FormulaTerm, data::D) where {D}
-    # with zerocorr we create only vectors and add them one by one with NCP
-    # without zerocorr we create a full-blown matrix with NCP
     if !has_ranef(formula)
         return nothing
     end
@@ -115,10 +113,10 @@ function ranef(formula::FormulaTerm)
             lhs, rhs = first(t.args_parsed), last(t.args_parsed)
             RandomEffectsTerm(lhs, rhs)
         end
+        return terms
     else
-        terms = nothing
+        return nothing
     end
-    return terms
 end
 
 """
@@ -188,19 +186,6 @@ function slope_per_ranef(terms::Tuple)
     end
     return slopes
 end
-
-"""
-    has_zerocorr(formula::FormulaTerm)
-
-Returns `true` if any of the terms in `formula` is a `ZeroCorr` or false
-otherwise.
-"""
-function has_zerocorr(formula::FormulaTerm)
-    return any(t -> t isa FunctionTerm{typeof(zerocorr)}, formula.rhs)
-end
-
-# TODO:
-#   complex zerocorr stuff like a ranef term has zerocorr and other do not.
 
 """
     get_idx(term::Term, data)

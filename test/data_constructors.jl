@@ -381,36 +381,6 @@
         )
     end
 
-    @testset "has_zerocorr" begin
-        f = @formula y_float ~ 1 + x_int + (1 | x_cat)
-        @test T.has_zerocorr(f) == false
-
-        f = @formula y_float ~ 0 + x_int + (1 | x_cat)
-        @test T.has_zerocorr(f) == false
-
-        f = @formula y_float ~ x_int + (1 | x_cat)
-        @test T.has_zerocorr(f) == false
-
-        f = @formula y_float ~ 1 + x_int + (1 | x_cat) + zerocorr(x_cat)
-        @test T.has_zerocorr(f) == true
-
-        f = @formula y_float ~ 0 + x_int + (1 | x_cat) + zerocorr(x_cat)
-        @test T.has_zerocorr(f) == true
-
-        f = @formula y_float ~ x_int + (1 | x_cat) + zerocorr(x_cat)
-        @test T.has_zerocorr(f) == true
-
-        f = @formula y_float ~ 1 + x_float + (1 | x_cat) + (1 | x_cat) + zerocorr(x_cat)
-        @test T.has_zerocorr(f) == true
-
-        f = @formula y_float ~
-            1 +
-            (1 + x_int + x_float | x_cat) +
-            (1 + x_int + x_float | group) +
-            zerocorr(group)
-        @test T.has_zerocorr(f) == true
-    end
-
     @testset "get_idx" begin
         expected = ([1, 2, 3, 4], Dict(1.1 => 1, 3.65 => 4, 2.3 => 2, 3.14 => 3))
         @test T.get_idx(T.term("x_float"), nt_str) == expected
