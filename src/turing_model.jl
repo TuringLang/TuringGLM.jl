@@ -24,8 +24,7 @@ means that the values of `x1` will be multiplied (interacted) with the values of
 
 Random-effects (a.k.a. group-level effects) can be specified with the `(term | group)` inside
 the `@formula`, where `term` is the independent variable and `group` is the **categorical**
-representation (i.e. either a column of `String`s or a `CategoricalArray` in `data`) of the
-grouping variable.
+representation (i.e., either a column of `String`s or a `CategoricalArray` in `data`).
 You can specify a random-intercept with `(1 | group)`.
 
 Example: `@formula(y ~ (1 | group) + x1)`.
@@ -207,11 +206,8 @@ function turing_model(
         μ_y, σ_y, y = standardize_predictors(y)
         if !isnothing(Z)
             #TODO: implement random-effects slope
-            throw(
-                ArgumentError(
-                    "TuringGLM currently does not support random-effects for slope terms"
-                ),
-            )
+            msg = "TuringGLM currently does not support random-effects for slope terms"
+            throw(ArgumentError(msg))
         end
     end
 

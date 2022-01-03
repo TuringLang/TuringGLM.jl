@@ -1,8 +1,9 @@
 @testset "turing_model.jl" begin
-    kidiq = CSV.read(joinpath("..", "data", "kidiq.csv"), DataFrame)
-    wells = CSV.read(joinpath("..", "data", "wells.csv"), DataFrame)
-    roaches = CSV.read(joinpath("..", "data", "roaches.csv"), DataFrame)
-    cheese = CSV.read(joinpath("..", "data", "cheese.csv"), DataFrame)
+    const DATA_DIR = joinpath("..", "data")
+    kidiq = CSV.read(joinpath(DATA_DIR, "kidiq.csv"), DataFrame)
+    wells = CSV.read(joinpath(DATA_DIR, "wells.csv"), DataFrame)
+    roaches = CSV.read(joinpath(DATA_DIR, "roaches.csv"), DataFrame)
+    cheese = CSV.read(joinpath(DATA_DIR, "cheese.csv"), DataFrame)
     @testset "Gaussian Model" begin
         f = @formula(kid_score ~ mom_iq * mom_hs)
         @testset "standardize=false" begin
