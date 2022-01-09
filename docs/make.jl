@@ -11,7 +11,7 @@ makedocs(;
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
         canonical="https://TuringLang.github.io/TuringGLM.jl",
-        assets = ["assets/favicon.ico"],
+        assets=["assets/favicon.ico"],
     ),
     pages=[
         "Home" => "index.md",
@@ -22,6 +22,7 @@ makedocs(;
             "tutorials/negativebinomial_regression.md",
             "tutorials/robust_regression.md",
             "tutorials/hierarchical_models.md",
+            "tutorials/custom_priors.md",
         ],
         "API reference" => "api.md",
     ],

@@ -67,7 +67,8 @@ Pages = [
     "tutorials/poisson_regression.md",
     "tutorials/negativebinomial_regression.md",
     "tutorials/robust_regression.md",
-    "tutorials/hierarchical_models.md"
+    "tutorials/hierarchical_models.md",
+    "tutorials/custom_priors.md"
 ]
 Depth = 1
 ```
