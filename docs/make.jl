@@ -14,9 +14,9 @@ parallel_build(BuildOptions(tutorials_dir))
 tutorials = [
     "Linear Regression",
     "Logistic Regression",
-    "Poisson Regression",
-    "Negative Binomial Regression",
-    "Robust Regression",
+    # "Poisson Regression",
+    # "Negative Binomial Regression",
+    # "Robust Regression",
     # "Hierarchical Models",
     # "Custom Priors"
 ]
@@ -43,6 +43,8 @@ md_files = map(tutorials) do tutorial
     to = joinpath(tutorials_dir, "$file.md")
     println("Writing $to")
     write(to, md)
+
+    return joinpath("tutorials", "$file.md")
 end
 
 makedocs(;
@@ -57,15 +59,7 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
-        "Tutorials" => [
-            "tutorials/linear_regression.md",
-            "tutorials/logistic_regression.md",
-            "tutorials/poisson_regression.md",
-            "tutorials/negativebinomial_regression.md",
-            "tutorials/robust_regression.md",
-            "tutorials/hierarchical_models.md",
-            "tutorials/custom_priors.md",
-        ],
+        "Tutorials" => md_files,
         "API reference" => "api.md",
     ],
 )
