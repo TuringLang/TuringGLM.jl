@@ -67,7 +67,7 @@ Now we instantiate our model with turing_model passing a third argument Logistic
 model = turing_model(fm, wells, Logistic());
 
 # ╔═╡ ebe074cb-7bad-4b52-9c9d-b9752af4bedd
-chn = sample(model, NUTS(), 2_000)
+chn = sample(model, NUTS(), 2_000);
 
 # ╔═╡ d6499c1d-c2a1-4cc0-a8f4-c4ba86d5cf30
 describe(chn)[1]
