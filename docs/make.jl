@@ -14,11 +14,11 @@ parallel_build(BuildOptions(tutorials_dir))
 tutorials = [
     "Linear Regression",
     "Logistic Regression",
-    # "Poisson Regression",
-    # "Negative Binomial Regression",
-    # "Robust Regression",
-    # "Hierarchical Models",
-    # "Custom Priors"
+    "Poisson Regression",
+    "Negative Binomial Regression",
+    "Robust Regression",
+    "Hierarchical Models",
+    "Custom Priors"
 ]
 
 # Generate tutorials Markdown files which can be read by Documenter.jl
