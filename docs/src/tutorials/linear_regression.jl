@@ -7,9 +7,14 @@ using InteractiveUtils
 # ╔═╡ a4b92179-59f1-4406-a6d8-e2c844f63e95
 # hideall
 let
-	docs_dir = dirname(dirname(@__DIR__))
-	pkg_dir = dirname(docs_dir)
-	
+	pkg_dir = if "PKGDIR" in keys(ENV)
+		ENV["PKGDIR"]
+	else
+		dirname(dirname(dirname(@__DIR__)))
+	end
+	docs_dir = joinpath(pkg_dir, "docs")
+
+	@show docs_dir
 	using Pkg: Pkg
 	Pkg.activate(docs_dir)
 	Pkg.develop(path=pkg_dir)
@@ -39,7 +44,7 @@ For the purposes of this tutorial, we download the dataset from the TuringGLM re
 """
 
 # ╔═╡ e0a8ebec-3b29-42c2-a406-47d99df64b68
-url = "https://github.com/TuringLang/TuringGLM.jl/raw/main/data/kidiq.csv"
+url = "https://github.com/TuringLang/TuringGLM.jl/raw/main/data/kidiq.csv";
 
 # ╔═╡ 65b092a5-e6c5-48a0-9058-39a5c0094afa
 kidiq = CSV.read(download(url), DataFrame)
@@ -50,7 +55,7 @@ Using `kid_score` as dependent variable and `mom_hs` along with `mom_iq` as inde
 """
 
 # ╔═╡ a1031c0e-2237-409e-bf7d-65efb071f1da
-form = @formula(kid_score ~ mom_hs * mom_iq)
+fm = @formula(kid_score ~ mom_hs * mom_iq)
 
 # ╔═╡ 43d63761-adf5-4a52-b996-4ad3adfb35d0
 md"""
@@ -58,10 +63,10 @@ Next, we instantiate our model with turing_model without specifying any model, t
 """
 
 # ╔═╡ 55b91963-001e-4753-93a6-2fa64190f353
-model = turing_model(form, kidiq);
+model = turing_model(fm, kidiq);
 
 # ╔═╡ 92bec7a8-3524-4daa-9ef9-b58f2e59dea4
-n_samples = 2_000
+n_samples = 2_000;
 
 # ╔═╡ 7935378b-9f7a-418c-9d51-e77e4a551bde
 md"""

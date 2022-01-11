@@ -1,5 +1,3 @@
-# Linear Regression
-
 ```@eval
 # Auto generated file. Do not modify.
 ```
@@ -9,7 +7,7 @@
 <!--
     # This information is used for caching.
     [PlutoStaticHTML.State]
-    input_sha = "a7b10bf3934762c35c54820265e90273228636cd82bb05a16620b0d7a527be41"
+    input_sha = "4d9dce9d3dffdf4d286e623857b75b00de22ec0528c54a0e4b813b3c320ffe3a"
     julia_version = "1.6.5"
 -->
 
@@ -39,8 +37,8 @@
 <pre><code class="language-julia">using TuringGLM</code></pre>
 
 
-<pre><code class="language-julia">url = "https://github.com/TuringLang/TuringGLM.jl/raw/main/data/kidiq.csv";</code></pre>
-
+<pre><code class="language-julia">url = "https://github.com/TuringLang/TuringGLM.jl/raw/main/data/kidiq.csv"</code></pre>
+<pre><code class="code-output">"https://github.com/TuringLang/TuringGLM.jl/raw/main/data/kidiq.csv"</code></pre>
 
 <pre><code class="language-julia">kidiq = CSV.read(download(url), DataFrame)</code></pre>
 <table>
@@ -142,8 +140,8 @@ Predictors:
 <pre><code class="language-julia">model = turing_model(form, kidiq);</code></pre>
 
 
-<pre><code class="language-julia">n_samples = 2_000;</code></pre>
-
+<pre><code class="language-julia">n_samples = 2_000</code></pre>
+<pre><code class="code-output">2000</code></pre>
 
 
 <div class="markdown"><p>This model is a valid Turing model, which we can pass to the default <code>sample</code> function from Turing to get our parameter estimates. We use the <code>NUTS</code> sampler with 2000 samples.</p>
@@ -166,53 +164,53 @@ Predictors:
 </tr>
 <tr>
 <td>:α</td>
-<td>28.3197</td>
-<td>9.53003</td>
-<td>0.213098</td>
-<td>0.871093</td>
-<td>80.7859</td>
-<td>1.03667</td>
-<td>4.21528</td>
+<td>29.231</td>
+<td>7.36043</td>
+<td>0.164584</td>
+<td>0.437877</td>
+<td>212.667</td>
+<td>1.00133</td>
+<td>12.0697</td>
 </tr>
 <tr>
 <td>Symbol("β[1]")</td>
-<td>3.81875</td>
-<td>9.73987</td>
-<td>0.21779</td>
-<td>0.990821</td>
-<td>59.5104</td>
-<td>1.04776</td>
-<td>3.10516</td>
+<td>2.38864</td>
+<td>6.96086</td>
+<td>0.15565</td>
+<td>0.518943</td>
+<td>138.392</td>
+<td>1.00284</td>
+<td>7.85428</td>
 </tr>
 <tr>
 <td>Symbol("β[2]")</td>
-<td>0.542927</td>
-<td>0.103231</td>
-<td>0.00230832</td>
-<td>0.00934802</td>
-<td>79.7426</td>
-<td>1.03788</td>
-<td>4.16084</td>
+<td>0.533723</td>
+<td>0.0804497</td>
+<td>0.00179891</td>
+<td>0.00473018</td>
+<td>216.867</td>
+<td>1.00124</td>
+<td>12.308</td>
 </tr>
 <tr>
 <td>Symbol("β[3]")</td>
-<td>0.0148293</td>
-<td>0.104001</td>
-<td>0.00232554</td>
-<td>0.01047</td>
-<td>57.9492</td>
-<td>1.04906</td>
-<td>3.0237</td>
+<td>0.0292126</td>
+<td>0.0748627</td>
+<td>0.00167398</td>
+<td>0.0054763</td>
+<td>144.157</td>
+<td>1.0026</td>
+<td>8.18143</td>
 </tr>
 <tr>
 <td>:σ</td>
-<td>14.1138</td>
-<td>0.348161</td>
-<td>0.00778512</td>
-<td>0.0114017</td>
-<td>906.353</td>
-<td>1.00516</td>
-<td>47.2921</td>
+<td>14.0762</td>
+<td>0.333045</td>
+<td>0.00744711</td>
+<td>0.0146026</td>
+<td>533.336</td>
+<td>0.999503</td>
+<td>30.2688</td>
 </tr>
 </table>
 
