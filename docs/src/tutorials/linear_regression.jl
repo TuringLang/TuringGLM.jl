@@ -14,7 +14,6 @@ let
 	end
 	docs_dir = joinpath(pkg_dir, "docs")
 
-	@show docs_dir
 	using Pkg: Pkg
 	Pkg.activate(docs_dir)
 	Pkg.develop(path=pkg_dir)
