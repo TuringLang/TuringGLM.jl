@@ -35,8 +35,8 @@ effets.**
 
 # `data`
 
-`data` can be any `Tables.jl`-compatible data interface. The most popular ones are DataFrames
-and NamedTuples.
+`data` can be any `Tables.jl`-compatible data interface.
+The most popular ones are `DataFrame`s and `NamedTuple`s.
 
 # `model`
 
