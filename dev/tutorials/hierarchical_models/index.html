@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Hierarchical Models · TuringGLM.jl</title><script data-outdated-warner src="../../assets/warner.js"></script><link rel="canonical" href="https://TuringLang.github.io/TuringGLM.jl/tutorials/hierarchical_models/"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.png" alt="TuringGLM.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">TuringGLM.jl</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../linear_regression/">Linear Regression</a></li><li><a class="tocitem" href="../logistic_regression/">Logistic Regression</a></li><li><a class="tocitem" href="../poisson_regression/">Poisson Regression</a></li><li><a class="tocitem" href="../negative_binomial_regression/">Negative Binomial Regression</a></li><li><a class="tocitem" href="../robust_regression/">Robust Regression</a></li><li class="is-active"><a class="tocitem" href>Hierarchical Models</a></li><li><a class="tocitem" href="../custom_priors/">Custom Priors</a></li></ul></li><li><a class="tocitem" href="../../api/">API reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>Hierarchical Models</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Hierarchical Models</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/TuringLang/TuringGLM.jl/blob/master/docs/src/tutorials/hierarchical_models.md#" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Hierarchical-Models"><a class="docs-heading-anchor" href="#Hierarchical-Models">Hierarchical Models</a><a id="Hierarchical-Models-1"></a><a class="docs-heading-anchor-permalink" href="#Hierarchical-Models" title="Permalink"></a></h1><!-- PlutoStaticHTML.Begin -->
+<!--
+    # This information is used for caching.
+    [PlutoStaticHTML.State]
+    input_sha = "63f61b21aeec84418409671b11c988f589badd28bf266587a694783593546cad"
+    julia_version = "1.6.5"
+-->
+
+
+
+
+<div class="markdown"><p>Currently, TuringGLM only supports hierarchical models with a single random-intercept. This is done by using the <code>&#40;1 | group&#41;</code> inside the <code>@formula</code> macro.</p>
+<p>For our <strong>Hierarchical Model</strong> example, let&#39;s use a famous dataset called <code>cheese</code> &#40;Boatwright, McCulloch &amp; Rossi, 1999&#41;, which is data from cheese ratings. A group of 10 rural and 10 urban raters rated 4 types of different cheeses &#40;A, B, C and D&#41; in two samples. So we have <span class="tex">$4 \cdot 20 \cdot 2 &#61; 160$</span> observations and 4 variables:</p>
+<ul>
+<li><p><code>cheese</code>: type of cheese from <code>A</code> to <code>D</code></p>
+</li>
+<li><p><code>rater</code>: id of the rater from <code>1</code> to <code>10</code></p>
+</li>
+<li><p><code>background</code>: type of rater, either <code>rural</code> or <code>urban</code></p>
+</li>
+<li><p><code>y</code>: rating of the cheese</p>
+</li>
+</ul>
+</div>
+
+<pre><code class="language-julia">using CSV</code></pre>
+
+
+<pre><code class="language-julia">using DataFrames</code></pre>
+
+
+<pre><code class="language-julia">url = "https://github.com/TuringLang/TuringGLM.jl/raw/main/data/cheese.csv";</code></pre>
+
+
+<pre><code class="language-julia">cheese = CSV.read(download(url), DataFrame)</code></pre>
+<table>
+<tr>
+<th>cheese</th>
+<th>rater</th>
+<th>background</th>
+<th>y</th>
+</tr>
+<tr>
+<td>"A"</td>
+<td>1</td>
+<td>"rural"</td>
+<td>67</td>
+</tr>
+<tr>
+<td>"A"</td>
+<td>1</td>
+<td>"rural"</td>
+<td>66</td>
+</tr>
+<tr>
+<td>"B"</td>
+<td>1</td>
+<td>"rural"</td>
+<td>51</td>
+</tr>
+<tr>
+<td>"B"</td>
+<td>1</td>
+<td>"rural"</td>
+<td>53</td>
+</tr>
+<tr>
+<td>"C"</td>
+<td>1</td>
+<td>"rural"</td>
+<td>75</td>
+</tr>
+<tr>
+<td>"C"</td>
+<td>1</td>
+<td>"rural"</td>
+<td>70</td>
+</tr>
+<tr>
+<td>"D"</td>
+<td>1</td>
+<td>"rural"</td>
+<td>68</td>
+</tr>
+<tr>
+<td>"D"</td>
+<td>1</td>
+<td>"rural"</td>
+<td>66</td>
+</tr>
+<tr>
+<td>"A"</td>
+<td>2</td>
+<td>"rural"</td>
+<td>76</td>
+</tr>
+<tr>
+<td>"A"</td>
+<td>2</td>
+<td>"rural"</td>
+<td>76</td>
+</tr>
+<tr>
+<td>...</td>
+</tr>
+<tr>
+<td>"D"</td>
+<td>10</td>
+<td>"urban"</td>
+<td>83</td>
+</tr>
+</table>
+
+
+<pre><code class="language-julia">using TuringGLM</code></pre>
+
+
+
+<div class="markdown"><p>Using <code>y</code> as dependent variable and <code>background</code> is independent variable with a varying-intercept per <code>cheese</code> type:</p>
+</div>
+
+<pre><code class="language-julia">fm = @formula(y ~ (1 | cheese) + background)</code></pre>
+<pre><code class="code-output">FormulaTerm
+Response:
+  y(unknown)
+Predictors:
+  (cheese)->1 | cheese
+  background(unknown)</code></pre>
+
+
+<div class="markdown"><p>We instantiate our model with <code>turing_model</code> without specifying any model, thus the default model will be used: <code>Gaussian&#40;&#41;</code></p>
+</div>
+
+<pre><code class="language-julia">model = turing_model(fm, cheese);</code></pre>
+
+
+<pre><code class="language-julia">chn = sample(model, NUTS(), 2_000);</code></pre>
+
+
+<pre><code class="language-julia">describe(chn)[1]</code></pre>
+<table>
+<tr>
+<th>parameters</th>
+<th>mean</th>
+<th>std</th>
+<th>naive_se</th>
+<th>mcse</th>
+<th>ess</th>
+<th>rhat</th>
+<th>ess_per_sec</th>
+</tr>
+<tr>
+<td>:α</td>
+<td>68.2604</td>
+<td>4.98818</td>
+<td>0.111539</td>
+<td>0.169312</td>
+<td>792.198</td>
+<td>0.999778</td>
+<td>12.2364</td>
+</tr>
+<tr>
+<td>Symbol("β[1]")</td>
+<td>6.86192</td>
+<td>0.958932</td>
+<td>0.0214424</td>
+<td>0.0241181</td>
+<td>1828.12</td>
+<td>0.999787</td>
+<td>28.2375</td>
+</tr>
+<tr>
+<td>:σ</td>
+<td>5.87878</td>
+<td>0.265002</td>
+<td>0.00592562</td>
+<td>0.00800481</td>
+<td>1287.36</td>
+<td>1.00045</td>
+<td>19.8848</td>
+</tr>
+<tr>
+<td>:τ</td>
+<td>11.5805</td>
+<td>4.33264</td>
+<td>0.0968807</td>
+<td>0.146941</td>
+<td>825.131</td>
+<td>1.00122</td>
+<td>12.7451</td>
+</tr>
+<tr>
+<td>Symbol("zⱼ[1]")</td>
+<td>0.306766</td>
+<td>0.444074</td>
+<td>0.0099298</td>
+<td>0.0148972</td>
+<td>765.584</td>
+<td>0.999576</td>
+<td>11.8253</td>
+</tr>
+<tr>
+<td>Symbol("zⱼ[2]")</td>
+<td>-1.45937</td>
+<td>0.647463</td>
+<td>0.0144777</td>
+<td>0.0225972</td>
+<td>907.753</td>
+<td>1.00077</td>
+<td>14.0213</td>
+</tr>
+<tr>
+<td>Symbol("zⱼ[3]")</td>
+<td>0.772939</td>
+<td>0.516974</td>
+<td>0.0115599</td>
+<td>0.0171065</td>
+<td>750.239</td>
+<td>0.999503</td>
+<td>11.5883</td>
+</tr>
+<tr>
+<td>Symbol("zⱼ[4]")</td>
+<td>0.0633297</td>
+<td>0.431037</td>
+<td>0.00963827</td>
+<td>0.0148847</td>
+<td>779.842</td>
+<td>0.999672</td>
+<td>12.0456</td>
+</tr>
+</table>
+
+
+
+<div class="markdown"><h2>References</h2>
+<p>Boatwright, P., McCulloch, R., &amp; Rossi, P. &#40;1999&#41;. Account-level modeling for trade promotion: An application of a constrained parameter hierarchical model. Journal of the American Statistical Association, 94&#40;448&#41;, 1063–1073.</p>
+</div>
+
+<!-- PlutoStaticHTML.End --></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../robust_regression/">« Robust Regression</a><a class="docs-footer-nextpage" href="../custom_priors/">Custom Priors »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.10 on <span class="colophon-date" title="Tuesday 11 January 2022 20:20">Tuesday 11 January 2022</span>. Using Julia version 1.6.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

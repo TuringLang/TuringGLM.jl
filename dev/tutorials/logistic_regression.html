@@ -1,0 +1,225 @@
+<!-- PlutoStaticHTML.Begin -->
+<!--
+    # This information is used for caching.
+    [PlutoStaticHTML.State]
+    input_sha = "508eb3c5bb65e7fe0a1e2c675803a38d8f8ad41266a99ea384344d81632f4ec4"
+    julia_version = "1.6.5"
+-->
+
+
+
+
+<div class="markdown"><p>For our tutorial on <strong>Logistic Regression</strong>, let&#39;s use a famous dataset called <code>wells</code> &#40;Gelman &amp; Hill, 2007&#41;, which is data from a survey of 3,200 residents in a small area of Bangladesh suffering from arsenic contamination of groundwater. Respondents with elevated arsenic levels in their wells had been encouraged to switch their water source to a safe public or private well in the nearby area and the survey was conducted several years later to learn which of the affected residents had switched wells. It has 3,200 observations and the following variables:</p>
+<ul>
+<li><p><code>switch</code> – binary/dummy &#40;0 or 1&#41; for well-switching.</p>
+</li>
+<li><p><code>arsenic</code> – arsenic level in respondent&#39;s well.</p>
+</li>
+<li><p><code>dist</code> – distance &#40;meters&#41; from the respondent&#39;s house to the nearest well with safe drinking water.</p>
+</li>
+<li><p><code>association</code> – binary/dummy &#40;0 or 1&#41; if member&#40;s&#41; of household participate in community organizations.</p>
+</li>
+<li><p><code>educ</code> – years of education &#40;head of household&#41;.</p>
+</li>
+</ul>
+</div>
+
+<pre><code class="language-julia">using CSV</code></pre>
+
+
+<pre><code class="language-julia">using DataFrames</code></pre>
+
+
+<pre><code class="language-julia">using TuringGLM</code></pre>
+
+
+<pre><code class="language-julia">url = "https://github.com/TuringLang/TuringGLM.jl/raw/main/data/wells.csv";</code></pre>
+
+
+<pre><code class="language-julia">wells = CSV.read(download(url), DataFrame)</code></pre>
+<table>
+<tr>
+<th>switch</th>
+<th>arsenic</th>
+<th>dist</th>
+<th>assoc</th>
+<th>educ</th>
+</tr>
+<tr>
+<td>1</td>
+<td>2.36</td>
+<td>16.826</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0.71</td>
+<td>47.322</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>0</td>
+<td>2.07</td>
+<td>20.967</td>
+<td>0</td>
+<td>10</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1.15</td>
+<td>21.486</td>
+<td>0</td>
+<td>12</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1.1</td>
+<td>40.874</td>
+<td>1</td>
+<td>14</td>
+</tr>
+<tr>
+<td>1</td>
+<td>3.9</td>
+<td>69.518</td>
+<td>1</td>
+<td>9</td>
+</tr>
+<tr>
+<td>1</td>
+<td>2.97</td>
+<td>80.711</td>
+<td>1</td>
+<td>4</td>
+</tr>
+<tr>
+<td>1</td>
+<td>3.24</td>
+<td>55.146</td>
+<td>0</td>
+<td>10</td>
+</tr>
+<tr>
+<td>1</td>
+<td>3.28</td>
+<td>52.647</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>2.52</td>
+<td>75.072</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>...</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0.66</td>
+<td>20.844</td>
+<td>1</td>
+<td>5</td>
+</tr>
+</table>
+
+
+
+<div class="markdown"><p>Using <code>switch</code> as dependent variable and <code>dist</code>, <code>arsenic</code>, <code>assoc</code>, and <code>educ</code> as independent variables:</p>
+</div>
+
+<pre><code class="language-julia">fm = @formula(switch ~ dist + arsenic + assoc + educ)</code></pre>
+<pre><code class="code-output">FormulaTerm
+Response:
+  switch(unknown)
+Predictors:
+  dist(unknown)
+  arsenic(unknown)
+  assoc(unknown)
+  educ(unknown)</code></pre>
+
+
+<div class="markdown"><p>Now we instantiate our model with <code>turing_model</code> passing a third argument <code>Logistic&#40;&#41;</code> to indicate that the model is a logistic regression:</p>
+</div>
+
+<pre><code class="language-julia">model = turing_model(fm, wells, Logistic());</code></pre>
+
+
+<pre><code class="language-julia">chn = sample(model, NUTS(), 2_000);</code></pre>
+
+
+<pre><code class="language-julia">describe(chn)[1]</code></pre>
+<table>
+<tr>
+<th>parameters</th>
+<th>mean</th>
+<th>std</th>
+<th>naive_se</th>
+<th>mcse</th>
+<th>ess</th>
+<th>rhat</th>
+<th>ess_per_sec</th>
+</tr>
+<tr>
+<td>:α</td>
+<td>-0.152865</td>
+<td>0.0999395</td>
+<td>0.00223471</td>
+<td>0.00340886</td>
+<td>859.884</td>
+<td>0.999502</td>
+<td>6.03017</td>
+</tr>
+<tr>
+<td>Symbol("β[1]")</td>
+<td>-0.00900008</td>
+<td>0.00103449</td>
+<td>2.31319e-5</td>
+<td>2.14661e-5</td>
+<td>2271.99</td>
+<td>0.999884</td>
+<td>15.933</td>
+</tr>
+<tr>
+<td>Symbol("β[2]")</td>
+<td>0.467941</td>
+<td>0.039744</td>
+<td>0.000888702</td>
+<td>0.00130796</td>
+<td>950.913</td>
+<td>1.00017</td>
+<td>6.66853</td>
+</tr>
+<tr>
+<td>Symbol("β[3]")</td>
+<td>-0.126394</td>
+<td>0.0768267</td>
+<td>0.0017179</td>
+<td>0.00223617</td>
+<td>1190.04</td>
+<td>1.00105</td>
+<td>8.3455</td>
+</tr>
+<tr>
+<td>Symbol("β[4]")</td>
+<td>0.0420916</td>
+<td>0.00950835</td>
+<td>0.000212613</td>
+<td>0.000242121</td>
+<td>1245.26</td>
+<td>0.999513</td>
+<td>8.73275</td>
+</tr>
+</table>
+
+
+
+<div class="markdown"><h2>References</h2>
+<p>Gelman, A., &amp; Hill, J. &#40;2007&#41;. Data analysis using regression and multilevel/hierarchical models. Cambridge university press.</p>
+</div>
+
+<!-- PlutoStaticHTML.End -->

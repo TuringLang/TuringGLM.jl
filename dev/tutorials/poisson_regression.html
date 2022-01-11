@@ -1,0 +1,218 @@
+<!-- PlutoStaticHTML.Begin -->
+<!--
+    # This information is used for caching.
+    [PlutoStaticHTML.State]
+    input_sha = "21486e92c12fe953052c606d656ae518497a22b0afcc978193c47949a50186a1"
+    julia_version = "1.6.5"
+-->
+
+
+
+
+<div class="markdown"><p>For our example on <strong>Poisson Regression</strong>, let&#39;s use a famous dataset called <code>roaches</code> &#40;Gelman &amp; Hill, 2007&#41;, which is data on the efficacy of a pest management system at reducing the number of roaches in urban apartments. It has 262 observations and the following variables:</p>
+<ul>
+<li><p><code>y</code> – number of roaches caught.</p>
+</li>
+<li><p><code>roach1</code> – pretreatment number of roaches.</p>
+</li>
+<li><p><code>treatment</code> – binary/dummy &#40;0 or 1&#41; for treatment indicator.</p>
+</li>
+<li><p><code>senior</code> – binary/dummy &#40;0 or 1&#41; for only elderly residents in building.</p>
+</li>
+<li><p><code>exposure2</code> – number of days for which the roach traps were used</p>
+</li>
+</ul>
+</div>
+
+<pre><code class="language-julia">using CSV</code></pre>
+
+
+<pre><code class="language-julia">using DataFrames</code></pre>
+
+
+<pre><code class="language-julia">url = "https://github.com/TuringLang/TuringGLM.jl/raw/main/data/roaches.csv";</code></pre>
+
+
+<pre><code class="language-julia">roaches = CSV.read(download(url), DataFrame)</code></pre>
+<table>
+<tr>
+<th>y</th>
+<th>roach1</th>
+<th>treatment</th>
+<th>senior</th>
+<th>exposure2</th>
+</tr>
+<tr>
+<td>153</td>
+<td>308.0</td>
+<td>1</td>
+<td>0</td>
+<td>0.8</td>
+</tr>
+<tr>
+<td>127</td>
+<td>331.25</td>
+<td>1</td>
+<td>0</td>
+<td>0.6</td>
+</tr>
+<tr>
+<td>7</td>
+<td>1.67</td>
+<td>1</td>
+<td>0</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td>7</td>
+<td>3.0</td>
+<td>1</td>
+<td>0</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td>0</td>
+<td>2.0</td>
+<td>1</td>
+<td>0</td>
+<td>1.14286</td>
+</tr>
+<tr>
+<td>0</td>
+<td>0.0</td>
+<td>1</td>
+<td>0</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td>73</td>
+<td>70.0</td>
+<td>1</td>
+<td>0</td>
+<td>0.8</td>
+</tr>
+<tr>
+<td>24</td>
+<td>64.56</td>
+<td>1</td>
+<td>0</td>
+<td>1.14286</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1.0</td>
+<td>0</td>
+<td>0</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td>2</td>
+<td>14.0</td>
+<td>0</td>
+<td>0</td>
+<td>1.14286</td>
+</tr>
+<tr>
+<td>...</td>
+</tr>
+<tr>
+<td>8</td>
+<td>0.0</td>
+<td>0</td>
+<td>1</td>
+<td>1.0</td>
+</tr>
+</table>
+
+
+<pre><code class="language-julia">using TuringGLM</code></pre>
+
+
+
+<div class="markdown"><p>Using <code>y</code> as dependent variable and <code>roach1</code>, <code>treatment</code>, and <code>senior</code> as independent variables:</p>
+</div>
+
+<pre><code class="language-julia">fm = @formula(y ~ roach1 + treatment + senior)</code></pre>
+<pre><code class="code-output">FormulaTerm
+Response:
+  y(unknown)
+Predictors:
+  roach1(unknown)
+  treatment(unknown)
+  senior(unknown)</code></pre>
+
+
+<div class="markdown"><p>We instantiate our model with <code>turing_model</code> passing a third argument <code>Pois&#40;&#41;</code> to indicate that the model is a Poisson Regression</p>
+</div>
+
+<pre><code class="language-julia">model = turing_model(fm, roaches, Pois());</code></pre>
+
+
+
+<div class="markdown"><p>Sample the model using the <code>NUTS</code> sampler and 2,000 samples:</p>
+</div>
+
+<pre><code class="language-julia">chn = sample(model, NUTS(), 2_000);</code></pre>
+
+
+<pre><code class="language-julia">describe(chn)[1]</code></pre>
+<table>
+<tr>
+<th>parameters</th>
+<th>mean</th>
+<th>std</th>
+<th>naive_se</th>
+<th>mcse</th>
+<th>ess</th>
+<th>rhat</th>
+<th>ess_per_sec</th>
+</tr>
+<tr>
+<td>:α</td>
+<td>3.13572</td>
+<td>0.0211998</td>
+<td>0.000474042</td>
+<td>0.000782677</td>
+<td>787.685</td>
+<td>1.00003</td>
+<td>7.43296</td>
+</tr>
+<tr>
+<td>Symbol("β[1]")</td>
+<td>0.00644424</td>
+<td>8.6388e-5</td>
+<td>1.93169e-6</td>
+<td>2.28733e-6</td>
+<td>1371.24</td>
+<td>1.00009</td>
+<td>12.9397</td>
+</tr>
+<tr>
+<td>Symbol("β[2]")</td>
+<td>-0.512529</td>
+<td>0.0246843</td>
+<td>0.000551957</td>
+<td>0.000735892</td>
+<td>735.555</td>
+<td>1.00019</td>
+<td>6.94103</td>
+</tr>
+<tr>
+<td>Symbol("β[3]")</td>
+<td>-0.375482</td>
+<td>0.0336253</td>
+<td>0.000751884</td>
+<td>0.0011312</td>
+<td>848.399</td>
+<td>1.00222</td>
+<td>8.00588</td>
+</tr>
+</table>
+
+
+
+<div class="markdown"><h2>References</h2>
+<p>Gelman, A., &amp; Hill, J. &#40;2007&#41;. Data analysis using regression and multilevel/hierarchical models. Cambridge university press.</p>
+</div>
+
+<!-- PlutoStaticHTML.End -->

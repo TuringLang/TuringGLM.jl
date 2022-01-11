@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Robust Regression · TuringGLM.jl</title><script data-outdated-warner src="../../assets/warner.js"></script><link rel="canonical" href="https://TuringLang.github.io/TuringGLM.jl/tutorials/robust_regression/"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.png" alt="TuringGLM.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">TuringGLM.jl</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../linear_regression/">Linear Regression</a></li><li><a class="tocitem" href="../logistic_regression/">Logistic Regression</a></li><li><a class="tocitem" href="../poisson_regression/">Poisson Regression</a></li><li><a class="tocitem" href="../negative_binomial_regression/">Negative Binomial Regression</a></li><li class="is-active"><a class="tocitem" href>Robust Regression</a></li><li><a class="tocitem" href="../hierarchical_models/">Hierarchical Models</a></li><li><a class="tocitem" href="../custom_priors/">Custom Priors</a></li></ul></li><li><a class="tocitem" href="../../api/">API reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>Robust Regression</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Robust Regression</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/TuringLang/TuringGLM.jl/blob/master/docs/src/tutorials/robust_regression.md#" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Robust-Regression"><a class="docs-heading-anchor" href="#Robust-Regression">Robust Regression</a><a id="Robust-Regression-1"></a><a class="docs-heading-anchor-permalink" href="#Robust-Regression" title="Permalink"></a></h1><!-- PlutoStaticHTML.Begin -->
+<!--
+    # This information is used for caching.
+    [PlutoStaticHTML.State]
+    input_sha = "82c7e3aa7460816c54cf75cde851537479a6c7836fac5cee7dd729faca8cf96d"
+    julia_version = "1.6.5"
+-->
+
+
+
+
+<div class="markdown"><p>For the <strong>Robust Regression</strong> with Student-<span class="tex">$t$</span> distribution as the likelihood, we&#39;ll use a famous dataset called <code>kidiq</code> &#40;Gelman &amp; Hill, 2007&#41;, which is data from a survey of adult American women and their respective children. Dated from 2007, it has 434 observations and 4 variables:</p>
+<ul>
+<li><p><code>kid_score</code>: child&#39;s IQ</p>
+</li>
+<li><p><code>mom_hs</code>: binary/dummy &#40;0 or 1&#41; if the child&#39;s mother has a high school diploma</p>
+</li>
+<li><p><code>mom_iq</code>: mother&#39;s IQ</p>
+</li>
+<li><p><code>mom_age</code>: mother&#39;s age</p>
+</li>
+</ul>
+</div>
+
+<pre><code class="language-julia">using CSV</code></pre>
+
+
+<pre><code class="language-julia">using DataFrames</code></pre>
+
+
+<pre><code class="language-julia">url = "https://github.com/TuringLang/TuringGLM.jl/raw/main/data/kidiq.csv"</code></pre>
+<pre><code class="code-output">"https://github.com/TuringLang/TuringGLM.jl/raw/main/data/kidiq.csv"</code></pre>
+
+<pre><code class="language-julia">kidiq = CSV.read(download(url), DataFrame)</code></pre>
+<table>
+<tr>
+<th>kid_score</th>
+<th>mom_hs</th>
+<th>mom_iq</th>
+<th>mom_age</th>
+</tr>
+<tr>
+<td>65</td>
+<td>1</td>
+<td>121.118</td>
+<td>27</td>
+</tr>
+<tr>
+<td>98</td>
+<td>1</td>
+<td>89.3619</td>
+<td>25</td>
+</tr>
+<tr>
+<td>85</td>
+<td>1</td>
+<td>115.443</td>
+<td>27</td>
+</tr>
+<tr>
+<td>83</td>
+<td>1</td>
+<td>99.4496</td>
+<td>25</td>
+</tr>
+<tr>
+<td>115</td>
+<td>1</td>
+<td>92.7457</td>
+<td>27</td>
+</tr>
+<tr>
+<td>98</td>
+<td>0</td>
+<td>107.902</td>
+<td>18</td>
+</tr>
+<tr>
+<td>69</td>
+<td>1</td>
+<td>138.893</td>
+<td>20</td>
+</tr>
+<tr>
+<td>106</td>
+<td>1</td>
+<td>125.145</td>
+<td>23</td>
+</tr>
+<tr>
+<td>102</td>
+<td>1</td>
+<td>81.6195</td>
+<td>24</td>
+</tr>
+<tr>
+<td>95</td>
+<td>1</td>
+<td>95.0731</td>
+<td>19</td>
+</tr>
+<tr>
+<td>...</td>
+</tr>
+<tr>
+<td>70</td>
+<td>1</td>
+<td>91.2533</td>
+<td>25</td>
+</tr>
+</table>
+
+
+<pre><code class="language-julia">using TuringGLM</code></pre>
+
+
+
+<div class="markdown"><p>Using <code>kid_score</code> as dependent variable and <code>mom_hs</code> along with <code>mom_iq</code> as independent variables with a moderation &#40;interaction&#41; effect:</p>
+</div>
+
+<pre><code class="language-julia">fm = @formula(kid_score ~ mom_hs * mom_iq)</code></pre>
+<pre><code class="code-output">FormulaTerm
+Response:
+  kid_score(unknown)
+Predictors:
+  mom_hs(unknown)
+  mom_iq(unknown)
+  mom_hs(unknown) & mom_iq(unknown)</code></pre>
+
+
+<div class="markdown"><p>We instantiate our model with <code>turing_model</code> passing a third argument <code>Student&#40;&#41;</code> to indicate that the model is a robust regression with the Student&#39;s t-distribution:</p>
+</div>
+
+<pre><code class="language-julia">model = turing_model(fm, kidiq, Student());</code></pre>
+
+
+<pre><code class="language-julia">chn = sample(model, NUTS(), 2_000);</code></pre>
+
+
+<pre><code class="language-julia">describe(chn)[1]</code></pre>
+<table>
+<tr>
+<th>parameters</th>
+<th>mean</th>
+<th>std</th>
+<th>naive_se</th>
+<th>mcse</th>
+<th>ess</th>
+<th>rhat</th>
+<th>ess_per_sec</th>
+</tr>
+<tr>
+<td>:α</td>
+<td>40.6033</td>
+<td>6.50159</td>
+<td>0.14538</td>
+<td>0.322325</td>
+<td>294.497</td>
+<td>1.00055</td>
+<td>2.23432</td>
+</tr>
+<tr>
+<td>Symbol("β[1]")</td>
+<td>2.41329</td>
+<td>6.404</td>
+<td>0.143198</td>
+<td>0.405404</td>
+<td>194.077</td>
+<td>1.0006</td>
+<td>1.47245</td>
+</tr>
+<tr>
+<td>Symbol("β[2]")</td>
+<td>0.469833</td>
+<td>0.0690009</td>
+<td>0.00154291</td>
+<td>0.00336762</td>
+<td>304.896</td>
+<td>1.0007</td>
+<td>2.31322</td>
+</tr>
+<tr>
+<td>Symbol("β[3]")</td>
+<td>0.0163971</td>
+<td>0.0670076</td>
+<td>0.00149834</td>
+<td>0.00412857</td>
+<td>203.319</td>
+<td>1.00081</td>
+<td>1.54257</td>
+</tr>
+<tr>
+<td>:σ</td>
+<td>6.17334</td>
+<td>0.481693</td>
+<td>0.010771</td>
+<td>0.026236</td>
+<td>471.826</td>
+<td>1.0007</td>
+<td>3.5797</td>
+</tr>
+<tr>
+<td>:ν</td>
+<td>1.04778</td>
+<td>0.111799</td>
+<td>0.00249991</td>
+<td>0.0064165</td>
+<td>421.425</td>
+<td>1.00292</td>
+<td>3.19731</td>
+</tr>
+</table>
+
+
+
+<div class="markdown"><h2>References</h2>
+<p>Gelman, A., &amp; Hill, J. &#40;2007&#41;. Data analysis using regression and multilevel/hierarchical models. Cambridge university press.</p>
+</div>
+
+<!-- PlutoStaticHTML.End --></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../negative_binomial_regression/">« Negative Binomial Regression</a><a class="docs-footer-nextpage" href="../hierarchical_models/">Hierarchical Models »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.10 on <span class="colophon-date" title="Tuesday 11 January 2022 20:20">Tuesday 11 January 2022</span>. Using Julia version 1.6.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

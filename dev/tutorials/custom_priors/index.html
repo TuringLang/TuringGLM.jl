@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Custom Priors · TuringGLM.jl</title><script data-outdated-warner src="../../assets/warner.js"></script><link rel="canonical" href="https://TuringLang.github.io/TuringGLM.jl/tutorials/custom_priors/"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.png" alt="TuringGLM.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">TuringGLM.jl</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../linear_regression/">Linear Regression</a></li><li><a class="tocitem" href="../logistic_regression/">Logistic Regression</a></li><li><a class="tocitem" href="../poisson_regression/">Poisson Regression</a></li><li><a class="tocitem" href="../negative_binomial_regression/">Negative Binomial Regression</a></li><li><a class="tocitem" href="../robust_regression/">Robust Regression</a></li><li><a class="tocitem" href="../hierarchical_models/">Hierarchical Models</a></li><li class="is-active"><a class="tocitem" href>Custom Priors</a></li></ul></li><li><a class="tocitem" href="../../api/">API reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>Custom Priors</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Custom Priors</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/TuringLang/TuringGLM.jl/blob/master/docs/src/tutorials/custom_priors.md#" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Custom-Priors"><a class="docs-heading-anchor" href="#Custom-Priors">Custom Priors</a><a id="Custom-Priors-1"></a><a class="docs-heading-anchor-permalink" href="#Custom-Priors" title="Permalink"></a></h1><!-- PlutoStaticHTML.Begin -->
+<!--
+    # This information is used for caching.
+    [PlutoStaticHTML.State]
+    input_sha = "ec057d0889b7f52703e45c4e6ca14af7e0ad758bdb3a5d33dfeba709366fc053"
+    julia_version = "1.6.5"
+-->
+
+
+
+
+<div class="markdown"><p>Let&#39;s cover the <strong>Linear Regression</strong> example with the <code>kidiq</code> dataset &#40;Gelman &amp; Hill, 2007&#41;, which is data from a survey of adult American women and their respective children. Dated from 2007, it has 434 observations and 4 variables:</p>
+<ul>
+<li><p><code>kid_score</code>: child&#39;s IQ</p>
+</li>
+<li><p><code>mom_hs</code>: binary/dummy &#40;0 or 1&#41; if the child&#39;s mother has a high school diploma</p>
+</li>
+<li><p><code>mom_iq</code>: mother&#39;s IQ</p>
+</li>
+<li><p><code>mom_age</code>: mother&#39;s age</p>
+</li>
+</ul>
+</div>
+
+<pre><code class="language-julia">using CSV</code></pre>
+
+
+<pre><code class="language-julia">using DataFrames</code></pre>
+
+
+<pre><code class="language-julia">url = "https://github.com/TuringLang/TuringGLM.jl/raw/main/data/kidiq.csv"</code></pre>
+<pre><code class="code-output">"https://github.com/TuringLang/TuringGLM.jl/raw/main/data/kidiq.csv"</code></pre>
+
+<pre><code class="language-julia">kidiq = CSV.read(download(url), DataFrame)</code></pre>
+<table>
+<tr>
+<th>kid_score</th>
+<th>mom_hs</th>
+<th>mom_iq</th>
+<th>mom_age</th>
+</tr>
+<tr>
+<td>65</td>
+<td>1</td>
+<td>121.118</td>
+<td>27</td>
+</tr>
+<tr>
+<td>98</td>
+<td>1</td>
+<td>89.3619</td>
+<td>25</td>
+</tr>
+<tr>
+<td>85</td>
+<td>1</td>
+<td>115.443</td>
+<td>27</td>
+</tr>
+<tr>
+<td>83</td>
+<td>1</td>
+<td>99.4496</td>
+<td>25</td>
+</tr>
+<tr>
+<td>115</td>
+<td>1</td>
+<td>92.7457</td>
+<td>27</td>
+</tr>
+<tr>
+<td>98</td>
+<td>0</td>
+<td>107.902</td>
+<td>18</td>
+</tr>
+<tr>
+<td>69</td>
+<td>1</td>
+<td>138.893</td>
+<td>20</td>
+</tr>
+<tr>
+<td>106</td>
+<td>1</td>
+<td>125.145</td>
+<td>23</td>
+</tr>
+<tr>
+<td>102</td>
+<td>1</td>
+<td>81.6195</td>
+<td>24</td>
+</tr>
+<tr>
+<td>95</td>
+<td>1</td>
+<td>95.0731</td>
+<td>19</td>
+</tr>
+<tr>
+<td>...</td>
+</tr>
+<tr>
+<td>70</td>
+<td>1</td>
+<td>91.2533</td>
+<td>25</td>
+</tr>
+</table>
+
+
+<pre><code class="language-julia">using TuringGLM</code></pre>
+
+
+
+<div class="markdown"><p>Using <code>kid_score</code> as dependent variable and <code>mom_hs</code> along with <code>mom_iq</code> as independent variables with a moderation &#40;interaction&#41; effect:</p>
+</div>
+
+<pre><code class="language-julia">fm = @formula(kid_score ~ mom_hs * mom_iq)</code></pre>
+<pre><code class="code-output">FormulaTerm
+Response:
+  kid_score(unknown)
+Predictors:
+  mom_hs(unknown)
+  mom_iq(unknown)
+  mom_hs(unknown) & mom_iq(unknown)</code></pre>
+
+
+<div class="markdown"><p>Let&#39;s create our CustomPrior object. No need for the third &#40;auxiliary&#41; prior for this model so we leave it as <code>nothing</code>:</p>
+</div>
+
+<pre><code class="language-julia">priors = CustomPrior(Normal(0, 2.5), Normal(10, 20), nothing);</code></pre>
+
+
+
+<div class="markdown"><p>We instantiate our model with <code>turing_model</code> without specifying any model, thus the default model will be used: <code>Gaussian&#40;&#41;</code>. Notice that we are specifying the <code>priors</code> keyword argument:</p>
+</div>
+
+<pre><code class="language-julia">model = turing_model(fm, kidiq; priors);</code></pre>
+
+
+<pre><code class="language-julia">chn = sample(model, NUTS(), 2_000);</code></pre>
+
+
+<pre><code class="language-julia">describe(chn)[1]</code></pre>
+<table>
+<tr>
+<th>parameters</th>
+<th>mean</th>
+<th>std</th>
+<th>naive_se</th>
+<th>mcse</th>
+<th>ess</th>
+<th>rhat</th>
+<th>ess_per_sec</th>
+</tr>
+<tr>
+<td>:α</td>
+<td>26.5434</td>
+<td>5.05617</td>
+<td>0.113059</td>
+<td>0.167835</td>
+<td>701.681</td>
+<td>1.00036</td>
+<td>7.52909</td>
+</tr>
+<tr>
+<td>Symbol("β[1]")</td>
+<td>2.46738</td>
+<td>2.36681</td>
+<td>0.0529235</td>
+<td>0.0719197</td>
+<td>721.317</td>
+<td>1.00248</td>
+<td>7.73979</td>
+</tr>
+<tr>
+<td>Symbol("β[2]")</td>
+<td>0.562669</td>
+<td>0.0565047</td>
+<td>0.00126348</td>
+<td>0.00192441</td>
+<td>652.623</td>
+<td>1.00058</td>
+<td>7.0027</td>
+</tr>
+<tr>
+<td>Symbol("β[3]")</td>
+<td>0.0249746</td>
+<td>0.0311542</td>
+<td>0.000696629</td>
+<td>0.000993459</td>
+<td>679.221</td>
+<td>1.0027</td>
+<td>7.28809</td>
+</tr>
+<tr>
+<td>:σ</td>
+<td>14.0899</td>
+<td>0.334315</td>
+<td>0.00747552</td>
+<td>0.00958224</td>
+<td>1494.32</td>
+<td>0.999766</td>
+<td>16.0342</td>
+</tr>
+</table>
+
+
+
+<div class="markdown"><h2>References</h2>
+<p>Gelman, A., &amp; Hill, J. &#40;2007&#41;. Data analysis using regression and multilevel/hierarchical models. Cambridge university press.</p>
+</div>
+
+<!-- PlutoStaticHTML.End --></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../hierarchical_models/">« Hierarchical Models</a><a class="docs-footer-nextpage" href="../../api/">API reference »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.10 on <span class="colophon-date" title="Tuesday 11 January 2022 20:20">Tuesday 11 January 2022</span>. Using Julia version 1.6.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
