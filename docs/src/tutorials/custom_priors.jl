@@ -57,7 +57,7 @@ fm = @formula(kid_score ~ mom_hs * mom_iq)
 # ╔═╡ 0cd3dfce-3001-4c6e-b550-ca6964f19e35
 md"""
 Let's create our CustomPrior object.
-No need for the third (auxiliary) prior for this model so we leave it as nothing:
+No need for the third (auxiliary) prior for this model so we leave it as `nothing`:
 """
 
 # ╔═╡ 9766b37c-55a0-4f74-924e-66b92eab7429
@@ -66,7 +66,7 @@ priors = CustomPrior(Normal(0, 2.5), Normal(10, 20), nothing);
 # ╔═╡ 56498ac7-3476-42eb-9c12-078562fff51d
 md"""
 We instantiate our model with `turing_model` without specifying any model, thus the default model will be used: `Gaussian()`.
-Notice that we are specifying the prior keyword argument:
+Notice that we are specifying the `priors` keyword argument:
 """
 
 # ╔═╡ 99cbb309-393f-4a13-9454-1dee747c88a6

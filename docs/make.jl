@@ -49,7 +49,7 @@ end
 
 makedocs(;
     modules=[TuringGLM],
-    authors="Jose Storopoli <thestoropoli@gmail.com> and contributors",
+    authors="Jose Storopoli <thestoropoli@gmail.com>, Rik Huijzer <rikhuijzer@pm.me>, and contributors",
     repo="https://github.com/TuringLang/TuringGLM.jl/blob/{commit}{path}#{line}",
     sitename="TuringGLM.jl",
     format=Documenter.HTML(;

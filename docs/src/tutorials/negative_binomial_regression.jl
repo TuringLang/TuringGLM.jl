@@ -58,7 +58,7 @@ fm = @formula(y ~ roach1 + treatment + senior)
 
 # ╔═╡ 124aeb01-7661-4402-a2fa-77d2771b686c
 md"""
-We instantiate our model with turing_model passing a third argument `NegBin()` to indicate that the model is a negative binomial regression:
+We instantiate our model with `turing_model` passing a third argument `NegBin()` to indicate that the model is a negative binomial regression:
 """
 
 # ╔═╡ 7ea3a50d-3b0d-4cfd-b311-806d6ae59c1a

@@ -67,7 +67,7 @@ model = turing_model(fm, roaches, Pois());
 
 # ╔═╡ aeeac527-2c32-407f-84a1-912cc74f51b7
 md"""
-Sample the model using the NUTS sampler:
+Sample the model using the `NUTS` sampler and 2,000 samples:
 """
 
 # ╔═╡ abe86f76-2d0f-42e5-8faa-52aa3ddea126

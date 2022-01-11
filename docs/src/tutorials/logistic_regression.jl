@@ -51,7 +51,7 @@ wells = CSV.read(download(url), DataFrame)
 
 # ╔═╡ ffb09bcb-3d02-455c-b153-345f4857fe9d
 md"""
-Using switch as dependent variable and dist, arsenic, assoc, and educ as independent variables:
+Using `switch` as dependent variable and `dist`, `arsenic`, `assoc`, and `educ` as independent variables:
 """
 
 # ╔═╡ 07175d0e-7293-4095-95cc-91fe493a1aef
@@ -59,7 +59,7 @@ fm = @formula(switch ~ dist + arsenic + assoc + educ)
 
 # ╔═╡ 2ebfa422-f8a5-44d3-8f2c-a34d7832d3f2
 md"""
-Now we instantiate our model with turing_model passing a third argument Logistic() to indicate that the model is a logistic regression:
+Now we instantiate our model with `turing_model` passing a third argument `Logistic()` to indicate that the model is a logistic regression:
 """
 
 # ╔═╡ 1f1158ce-73f0-49fd-a48a-af3b36376030
