@@ -7,17 +7,17 @@ using InteractiveUtils
 # ╔═╡ 587f852c-f357-4260-ae87-a60eaf101d36
 # hideall
 let
-	pkg_dir = if "PKGDIR" in keys(ENV)
-		ENV["PKGDIR"]
-	else
-		dirname(dirname(dirname(@__DIR__)))
-	end
-	docs_dir = joinpath(pkg_dir, "docs")
+    pkg_dir = if "PKGDIR" in keys(ENV)
+        ENV["PKGDIR"]
+    else
+        dirname(dirname(dirname(@__DIR__)))
+    end
+    docs_dir = joinpath(pkg_dir, "docs")
 
-	using Pkg: Pkg
-	Pkg.activate(docs_dir)
-	Pkg.develop(path=pkg_dir)
-	Pkg.instantiate()
+    using Pkg: Pkg
+    Pkg.activate(docs_dir)
+    Pkg.develop(; path=pkg_dir)
+    Pkg.instantiate()
 end
 
 # ╔═╡ 206214e5-ab7a-4cae-bc85-7a77ed909c39

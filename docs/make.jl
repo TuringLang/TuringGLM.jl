@@ -18,7 +18,7 @@ tutorials = [
     "Negative Binomial Regression",
     "Robust Regression",
     "Hierarchical Models",
-    "Custom Priors"
+    "Custom Priors",
 ]
 
 # Generate tutorials Markdown files which can be read by Documenter.jl
@@ -57,11 +57,7 @@ makedocs(;
         canonical="https://TuringLang.github.io/TuringGLM.jl",
         assets=["assets/favicon.ico"],
     ),
-    pages=[
-        "Home" => "index.md",
-        "Tutorials" => md_files,
-        "API reference" => "api.md",
-    ],
+    pages=["Home" => "index.md", "Tutorials" => md_files, "API reference" => "api.md"],
 )
 
 deploydocs(; repo="github.com/TuringLang/TuringGLM.jl", devbranch="main")
