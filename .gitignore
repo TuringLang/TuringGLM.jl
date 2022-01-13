@@ -10,3 +10,6 @@
 
 .vscode/
 .DS_Store
+
+# Temp copies for notebooks.
+**/_tmp_**
