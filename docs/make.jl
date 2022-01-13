@@ -26,14 +26,16 @@ makedocs(;
     repo="https://github.com/TuringLang/TuringGLM.jl/blob/{commit}{path}#{line}",
     sitename="TuringGLM.jl",
     format=Documenter.HTML(;
-        prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://TuringLang.github.io/TuringGLM.jl",
         assets=["assets/favicon.ico"],
+        canonical="https://TuringLang.github.io/TuringGLM.jl",
+        # Using MathJax3 since Pluto uses that engine too.
+        mathengine=Documenter.MathJax3(),
+        prettyurls=get(ENV, "CI", "false") == "true",
     ),
     pages=["Home" => "index.md", "Tutorials" => md_files, "API reference" => "api.md"],
 )
 
 deploydocs(; repo="github.com/TuringLang/TuringGLM.jl", devbranch="main")
 
-# For local development.
+# Useful for local development.
 cd(pkgdir(TuringGLM))
