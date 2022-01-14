@@ -7,7 +7,7 @@ using InteractiveUtils
 # ╔═╡ a4b92179-59f1-4406-a6d8-e2c844f63e95
 # hideall
 let
-    docs_dir = dirname(dirname(@__DIR__));
+    docs_dir = dirname(dirname(@__DIR__))
     pkg_dir = dirname(docs_dir)
 
     using Pkg: Pkg
@@ -16,7 +16,7 @@ let
     Pkg.instantiate()
 
     # Putting the include here to avoid Pluto getting confused about cell order.
-    include(joinpath(docs_dir, "src", "tutorials", "common.jl"));
+    include(joinpath(docs_dir, "src", "tutorials_utils.jl"))
 end;
 
 # ╔═╡ 79cac787-9b01-4c0e-bb7d-f4555fcf6216
