@@ -32,9 +32,7 @@ function plot_chains(chns)
         end
 
         hideydecorations!(ax)
-        if i < length(params)
-            hidexdecorations!(ax; grid=false)
-        else
+        if i == length(params)
             ax.xlabel = "Parameter estimate"
         end
     end
