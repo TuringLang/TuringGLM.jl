@@ -14,7 +14,10 @@ let
     Pkg.activate(docs_dir)
     Pkg.develop(; path=pkg_dir)
     Pkg.instantiate()
-end
+
+    # Putting the include here to avoid Pluto getting confused about cell order.
+    include(joinpath(docs_dir, "src", "tutorials_utils.jl"))
+end;
 
 # ╔═╡ 79cac787-9b01-4c0e-bb7d-f4555fcf6216
 using CSV
@@ -70,10 +73,11 @@ We use the `NUTS` sampler with $n_samples samples.
 """
 
 # ╔═╡ 3f26f821-0985-4e15-845d-4791c623a799
-chn = sample(model, NUTS(), n_samples);
+chns = sample(model, NUTS(), n_samples);
 
 # ╔═╡ 4adf2c8d-3f05-4ceb-897c-ee2e1b156474
-describe(chn)[1]
+# hide
+plot_chains(chns)
 
 # ╔═╡ 28ef5f85-7645-4b26-ad71-b043ef141a50
 md"""

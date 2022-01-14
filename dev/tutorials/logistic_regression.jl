@@ -7,18 +7,17 @@ using InteractiveUtils
 # ╔═╡ 4e046622-7300-11ec-0a1d-974094a4752e
 # hideall
 let
-    pkg_dir = if "PKGDIR" in keys(ENV)
-        ENV["PKGDIR"]
-    else
-        dirname(dirname(dirname(@__DIR__)))
-    end
-    docs_dir = joinpath(pkg_dir, "docs")
+    docs_dir = dirname(dirname(@__DIR__))
+    pkg_dir = dirname(docs_dir)
 
     using Pkg: Pkg
     Pkg.activate(docs_dir)
     Pkg.develop(; path=pkg_dir)
     Pkg.instantiate()
-end
+
+    # Putting the include here to avoid Pluto getting confused about cell order.
+    include(joinpath(docs_dir, "src", "tutorials_utils.jl"))
+end;
 
 # ╔═╡ 544dfb44-b8ae-4c2c-a03b-3e14c88c1d66
 using CSV
@@ -69,7 +68,8 @@ model = turing_model(fm, wells, Logistic());
 chn = sample(model, NUTS(), 2_000);
 
 # ╔═╡ d6499c1d-c2a1-4cc0-a8f4-c4ba86d5cf30
-describe(chn)[1]
+# hide
+plot_chains(chn)
 
 # ╔═╡ 2361e758-1b5b-4cb2-b7d5-8a03760befa6
 md"""

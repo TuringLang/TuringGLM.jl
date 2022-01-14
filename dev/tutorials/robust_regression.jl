@@ -7,18 +7,17 @@ using InteractiveUtils
 # ╔═╡ cea125d8-7303-11ec-3f43-6b79e00bca6a
 # hideall
 let
-    pkg_dir = if "PKGDIR" in keys(ENV)
-        ENV["PKGDIR"]
-    else
-        dirname(dirname(dirname(@__DIR__)))
-    end
-    docs_dir = joinpath(pkg_dir, "docs")
+    docs_dir = dirname(dirname(@__DIR__))
+    pkg_dir = dirname(docs_dir)
 
     using Pkg: Pkg
     Pkg.activate(docs_dir)
     Pkg.develop(; path=pkg_dir)
     Pkg.instantiate()
-end
+
+    # Putting the include here to avoid Pluto getting confused about cell order.
+    include(joinpath(docs_dir, "src", "tutorials_utils.jl"))
+end;
 
 # ╔═╡ e0b79bde-f1c1-4256-866e-eb0649e77cb7
 using CSV
@@ -41,7 +40,7 @@ Dated from 2007, it has 434 observations and 4 variables:
 """
 
 # ╔═╡ 2fda1cb5-ccc0-41e2-82a6-7549ffa082aa
-url = "https://github.com/TuringLang/TuringGLM.jl/raw/main/data/kidiq.csv"
+url = "https://github.com/TuringLang/TuringGLM.jl/raw/main/data/kidiq.csv";
 
 # ╔═╡ b2fa0a26-177d-4cb1-a8e6-73d6becf07e1
 kidiq = CSV.read(download(url), DataFrame)
@@ -67,7 +66,8 @@ model = turing_model(fm, kidiq, Student());
 chn = sample(model, NUTS(), 2_000);
 
 # ╔═╡ c2c17f3b-8728-4b0c-ab06-639862ca31f9
-describe(chn)[1]
+# hide
+plot_chains(chn)
 
 # ╔═╡ a90f1d84-b39c-47b5-a251-3a6f0dfae4b3
 md"""
