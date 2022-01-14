@@ -112,9 +112,7 @@ function turing_model(
     # Random-Effects Conditionals
     if has_ranef(formula)
         if priors isa DefaultPrior
-            custom_prior = CustomPrior(
-                TDist(3), median(y) + mad(y) * TDist(3), nothing
-            )
+            custom_prior = CustomPrior(TDist(3), median(y) + mad(y) * TDist(3), nothing)
         else
             custom_prior = priors
         end
@@ -152,9 +150,7 @@ function turing_model(
         return normal_model_ranef(y, X)
     else
         if priors isa DefaultPrior
-            custom_prior = CustomPrior(
-                TDist(3), median(y) + mad(y) * TDist(3), nothing
-            )
+            custom_prior = CustomPrior(TDist(3), median(y) + mad(y) * TDist(3), nothing)
         else
             custom_prior = priors
         end
@@ -475,9 +471,7 @@ function turing_model(
     # Random-Effects Conditionals
     if has_ranef(formula)
         if priors isa DefaultPrior
-            custom_prior = CustomPrior(
-                TDist(3), 2.5 * TDist(3), Gamma(0.01, 0.01)
-            )
+            custom_prior = CustomPrior(TDist(3), 2.5 * TDist(3), Gamma(0.01, 0.01))
         else
             custom_prior = priors
         end
@@ -515,9 +509,7 @@ function turing_model(
         return negbin_model_ranef(y, X)
     else
         if priors isa DefaultPrior
-            custom_prior = CustomPrior(
-                TDist(3), 2.5 * TDist(3), Gamma(0.01, 0.01)
-            )
+            custom_prior = CustomPrior(TDist(3), 2.5 * TDist(3), Gamma(0.01, 0.01))
         else
             custom_prior = priors
         end
