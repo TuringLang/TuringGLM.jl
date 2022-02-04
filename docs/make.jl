@@ -16,7 +16,8 @@ tutorials = [
 include("build.jl")
 
 build()
-md_files = generate_markdown_files()
+md_files = markdown_files()
+T = [t => f for (t, f) in zip(tutorials, md_files)]
 
 DocMeta.setdocmeta!(TuringGLM, :DocTestSetup, :(using TuringGLM); recursive=true)
 
@@ -32,10 +33,11 @@ makedocs(;
         mathengine=Documenter.MathJax3(),
         prettyurls=get(ENV, "CI", "false") == "true",
     ),
-    pages=["Home" => "index.md", "Tutorials" => md_files, "API reference" => "api.md"],
+    pages=["Home" => "index.md", "Tutorials" => T, "API reference" => "api.md"],
 )
 
 deploydocs(; repo="github.com/TuringLang/TuringGLM.jl", devbranch="main")
 
 # Useful for local development.
 cd(pkgdir(TuringGLM))
+
