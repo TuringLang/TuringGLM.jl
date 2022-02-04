@@ -134,6 +134,6 @@
     @testset "NegativeBinomial2" begin
         @test T.NegativeBinomial2(0, 1) == T.NegativeBinomial(1, 1)
         @test T.NegativeBinomial2(2, 8) == T.NegativeBinomial(8, 0.8)
-        @test_throws ArgumentError T.NegativeBinomial2(0, -1)
+        @test_throws DomainError T.NegativeBinomial2(0, -1)
     end
 end
