@@ -97,7 +97,7 @@ Returns `true` if any of the terms in `formula` is a `FunctionTerm` or false
 otherwise.
 """
 function has_ranef(formula::FormulaTerm)
-    return any(t -> t isa FunctionTerm, formula.rhs)
+    return any(t -> t isa FunctionTerm{typeof(|)}, formula.rhs)
 end
 
 """
