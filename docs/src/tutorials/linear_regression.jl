@@ -57,7 +57,7 @@ fm = @formula(kid_score ~ mom_hs * mom_iq)
 
 # ╔═╡ 43d63761-adf5-4a52-b996-4ad3adfb35d0
 md"""
-Next, we instantiate our model with `turing_model` without specifying any model, thus the default model will be used: `Gaussian()`:
+Next, we instantiate our model with `turing_model` without specifying any model, thus the default model will be used (`model=Gaussian`):
 """
 
 # ╔═╡ 55b91963-001e-4753-93a6-2fa64190f353

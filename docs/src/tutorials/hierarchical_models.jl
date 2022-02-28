@@ -59,7 +59,7 @@ fm = @formula(y ~ (1 | cheese) + background)
 
 # ╔═╡ 934b7ec9-d4b3-435c-876f-49215dca8809
 md"""
-We instantiate our model with `turing_model` without specifying any model, thus the default model will be used: `Gaussian()`
+We instantiate our model with `turing_model` without specifying any model, thus the default model will be used (`model=Gaussian`):
 """
 
 # ╔═╡ 5fc736a2-068e-4deb-9a77-bd21d93f6f32

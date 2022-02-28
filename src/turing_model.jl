@@ -1,6 +1,5 @@
 """
-    turing_model(formula, data; model=Gaussian(), priors=DefaultPrior(), standardize=false)
-    turing_model(formula, data, model; priors=DefaultPrior(), standardize=false)
+    turing_model(formula, data; model=Gaussian, priors=DefaultPrior(), standardize=false)
 
 Create a Turing model using `formula` syntax and a `data` source.
 
@@ -41,13 +40,14 @@ The most popular ones are `DataFrame`s and `NamedTuple`s.
 # `model`
 
 `model` represents the likelihood function which you want to condition your data on.
+It has to be a subtype of `Distributions.UnivariateDistribution`.
 Currently, `TuringGLM.jl` supports:
 
-* `Gaussian()` (the default if not specified): linear regression
-* `Student()`: robust linear regression
-* `Logistic()`: logistic regression
-* `Pois()`: Poisson count data regression
-* `NegBin()`: negative binomial robust count data regression
+* `Gaussian` (the default if not specified): linear regression
+* `TDist`: robust linear regression
+* `Bernoulli`: logistic regression
+* `Poisson`: Poisson count data regression
+* `NegativeBinomial`: negative binomial robust count data regression
 
 # `priors`
 
@@ -79,467 +79,304 @@ standardize the effects for better comparison. By default, `turing_model` sets `
 """
 function turing_model(
     formula::FormulaTerm,
-    data::D;
-    model=Gaussian(),
-    priors=DefaultPrior(),
-    standardize=false,
-) where {D}
-
-    # extract y, X and Z
-    y = data_response(formula, data)
-    X = data_fixed_effects(formula, data)
-    Z = data_random_effects(formula, data)
-
-    # μ and σ identities
-    μ_X = 0
-    σ_X = 1
-    μ_y = 0
-    σ_y = 1
-
-    if standardize
-        μ_X, σ_X, X = standardize_predictors(X)
-        μ_y, σ_y, y = standardize_predictors(y)
-        if !isnothing(Z)
-            #TODO: implement random-effects slope
-            throw(
-                ArgumentError(
-                    "TuringGLM currently does not support random-effects for slope terms"
-                ),
-            )
-        end
-    end
-
-    # Random-Effects Conditionals
-    if has_ranef(formula)
-        if priors isa DefaultPrior
-            custom_prior = CustomPrior(TDist(3), median(y) + mad(y) * TDist(3), nothing)
-        else
-            custom_prior = priors
-        end
-        intercept_ranef = intercept_per_ranef(ranef(formula))
-        group_var = first(ranef(formula)).rhs
-        idx = get_idx(term(group_var), data)
-        # print for the user the idx
-        println("The idx are $(last(idx))\n")
-        @model function normal_model_ranef(
-            y,
-            X;
-            predictors=size(X, 2),
-            idxs=first(idx),
-            n_gr=length(unique(first(idx))),
-            intercept_ranef=intercept_ranef,
-            μ_X=μ_X,
-            σ_X=σ_X,
-            prior=custom_prior,
-            residual=1 / std(y),
-        )
-            α ~ prior.intercept
-            β ~ filldist(prior.predictors, predictors)
-            σ ~ Exponential(residual)
-            μ = α .+ X * β
-            if !isempty(intercept_ranef)
-                τ ~ mad(y) * truncated(TDist(3), 0, Inf)
-                zⱼ ~ filldist(Normal(), n_gr)
-                αⱼ = zⱼ .* τ
-                μ .+= αⱼ[idxs]
-            end
-            #TODO: implement random-effects slope
-            y ~ MvNormal(μ, σ^2 * I)
-            return (; α, β, σ, τ, zⱼ, αⱼ, y)
-        end
-        return normal_model_ranef(y, X)
-    else
-        if priors isa DefaultPrior
-            custom_prior = CustomPrior(TDist(3), median(y) + mad(y) * TDist(3), nothing)
-        else
-            custom_prior = priors
-        end
-        @model function normal_model(
-            y,
-            X;
-            predictors=size(X, 2),
-            μ_X=μ_X,
-            σ_X=σ_X,
-            prior=custom_prior,
-            residual=1 / std(y),
-        )
-            α ~ prior.intercept
-            β ~ filldist(prior.predictors, predictors)
-            σ ~ Exponential(residual)
-            y ~ MvNormal(α .+ X * β, σ^2 * I)
-            return (; α, β, σ, y)
-        end
-        return normal_model(y, X)
-    end
-end
-
-function turing_model(
-    formula::FormulaTerm,
-    data::D,
-    model::Gaussian;
+    data;
+    model::Type{T}=Normal,
     priors::Prior=DefaultPrior(),
     standardize::Bool=false,
-) where {D}
-    return turing_model(formula, data; priors, standardize)
+) where {T<:UnivariateDistribution}
+    return _turing_model(formula, data, T; priors, standardize)
 end
 
-function turing_model(
-    formula::FormulaTerm, data::D, model::Student; priors=DefaultPrior(), standardize=false
-) where {D}
-    # extract y, X and Z
-    y = data_response(formula, data)
-    X = data_fixed_effects(formula, data)
-    Z = data_random_effects(formula, data)
-
-    # μ and σ identities
-    μ_X = 0
-    σ_X = 1
-    μ_y = 0
-    σ_y = 1
-
-    if standardize
-        μ_X, σ_X, X = standardize_predictors(X)
-        μ_y, σ_y, y = standardize_predictors(y)
-        if !isnothing(Z)
-            #TODO: implement random-effects slope
-            msg = "TuringGLM currently does not support random-effects for slope terms"
-            throw(ArgumentError(msg))
-        end
-    end
-
-    # Random-Effects Conditionals
-    if has_ranef(formula)
-        if priors isa DefaultPrior
-            custom_prior = CustomPrior(
-                TDist(3), median(y) + mad(y) * TDist(3), Gamma(2, 0.1)
-            )
-        else
-            custom_prior = priors
-        end
-        intercept_ranef = intercept_per_ranef(ranef(formula))
-        group_var = first(ranef(formula)).rhs
-        idx = get_idx(term(group_var), data)
-        # print for the user the idx
-        println("The idx are $(last(idx))\n")
-        @model function student_model_ranef(
-            y,
-            X;
-            predictors=size(X, 2),
-            idxs=first(idx),
-            n_gr=length(unique(first(idx))),
-            intercept_ranef=intercept_ranef,
-            μ_X=μ_X,
-            σ_X=σ_X,
-            prior=custom_prior,
-            residual=1 / std(y),
-        )
-            α ~ prior.intercept
-            β ~ filldist(prior.predictors, predictors)
-            σ ~ Exponential(residual)
-            ν ~ prior.auxiliary
-            μ = α .+ X * β
-            if !isempty(intercept_ranef)
-                τ ~ 0 + mad(y) * truncated(TDist(3), 0, Inf)
-                zⱼ ~ filldist(Normal(), n_gr)
-                αⱼ = zⱼ .* τ
-                μ .+= αⱼ[idxs]
-            end
-            #TODO: implement random-effects slope
-            y ~ arraydist(μ + σ * TDist.(ν))
-            return (; α, β, σ, ν, τ, zⱼ, αⱼ, y)
-        end
-        return student_model_ranef(y, X)
-    else
-        if priors isa DefaultPrior
-            custom_prior = CustomPrior(
-                TDist(3), median(y) + mad(y) * TDist(3), Gamma(2, 0.1)
-            )
-        else
-            custom_prior = priors
-        end
-        @model function student_model(
-            y,
-            X;
-            predictors=size(X, 2),
-            μ_X=μ_X,
-            σ_X=σ_X,
-            prior=custom_prior,
-            residual=1 / std(y),
-        )
-            α ~ prior.intercept
-            β ~ filldist(prior.predictors, predictors)
-            σ ~ Exponential(residual)
-            ν ~ prior.auxiliary
-            y ~ arraydist((α .+ X * β) .+ σ .* TDist.(ν))
-            return (; α, β, σ, ν, y)
-        end
-        return student_model(y, X)
-    end
-end
-
-function turing_model(
-    formula::FormulaTerm, data::D, model::Logistic; priors=DefaultPrior(), standardize=false
-) where {D}
-    # extract y, X and Z
-    y = data_response(formula, data)
-    X = data_fixed_effects(formula, data)
-    Z = data_random_effects(formula, data)
-
-    # μ and σ identities
-    μ_X = 0
-    σ_X = 1
-    μ_y = 0
-    σ_y = 1
-
-    if standardize
-        μ_X, σ_X, X = standardize_predictors(X)
-        μ_y, σ_y, y = standardize_predictors(y)
-        if !isnothing(Z)
-            #TODO: implement random-effects slope
-            throw(
-                ArgumentError(
-                    "TuringGLM currently does not support random-effects for slope terms"
-                ),
-            )
-        end
-    end
-
-    # Random-Effects Conditionals
-    if has_ranef(formula)
-        if priors isa DefaultPrior
-            custom_prior = CustomPrior(TDist(3), 2.5 * TDist(3), nothing)
-        else
-            custom_prior = priors
-        end
-        intercept_ranef = intercept_per_ranef(ranef(formula))
-        group_var = first(ranef(formula)).rhs
-        idx = get_idx(term(group_var), data)
-        # print for the user the idx
-        println("The idx are $(last(idx))\n")
-        @model function bernoulli_model_ranef(
-            y,
-            X;
-            predictors=size(X, 2),
-            idxs=first(idx),
-            n_gr=length(unique(first(idx))),
-            intercept_ranef=intercept_ranef,
-            μ_X=μ_X,
-            σ_X=σ_X,
-            prior=custom_prior,
-        )
-            α ~ prior.intercept
-            β ~ filldist(prior.predictors, predictors)
-            μ = α .+ X * β
-            if !isempty(intercept_ranef)
-                τ ~ mad(y) * truncated(TDist(3), 0, Inf)
-                zⱼ ~ filldist(Normal(), n_gr)
-                αⱼ = zⱼ .* τ
-                μ .+= αⱼ[idxs]
-            end
-            #TODO: implement random-effects slope
-            y ~ arraydist(LazyArray(@~ BernoulliLogit.(μ)))
-            return (; α, β, τ, zⱼ, αⱼ, y)
-        end
-        return bernoulli_model_ranef(y, X)
-    else
-        if priors isa DefaultPrior
-            custom_prior = CustomPrior(TDist(3), 2.5 * TDist(3), nothing)
-        else
-            custom_prior = priors
-        end
-        @model function bernoulli_model(
-            y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=custom_prior
-        )
-            α ~ prior.intercept
-            β ~ filldist(prior.predictors, predictors)
-            y ~ arraydist(LazyArray(@~ BernoulliLogit.(α .+ X * β)))
-            return (; α, β, y)
-        end
-        return bernoulli_model(y, X)
-    end
-end
-
-function turing_model(
-    formula::FormulaTerm, data::D, model::Pois; priors=DefaultPrior(), standardize=false
-) where {D}
-    # extract y, X and Z
-    y = data_response(formula, data)
-    X = data_fixed_effects(formula, data)
-    Z = data_random_effects(formula, data)
-
-    # μ and σ identities
-    μ_X = 0
-    σ_X = 1
-    μ_y = 0
-    σ_y = 1
-
-    if standardize
-        μ_X, σ_X, X = standardize_predictors(X)
-        μ_y, σ_y, y = standardize_predictors(y)
-        if !isnothing(Z)
-            #TODO: implement random-effects slope
-            throw(
-                ArgumentError(
-                    "TuringGLM currently does not support random-effects for slope terms"
-                ),
-            )
-        end
-    end
-
-    # Random-Effects Conditionals
-    if has_ranef(formula)
-        if priors isa DefaultPrior
-            custom_prior = CustomPrior(TDist(3), 2.5 * TDist(3), nothing)
-        else
-            custom_prior = priors
-        end
-        intercept_ranef = intercept_per_ranef(ranef(formula))
-        group_var = first(ranef(formula)).rhs
-        idx = get_idx(term(group_var), data)
-        # print for the user the idx
-        println("The idx are $(last(idx))\n")
-        @model function poisson_model_ranef(
-            y,
-            X;
-            predictors=size(X, 2),
-            idxs=first(idx),
-            n_gr=length(unique(first(idx))),
-            intercept_ranef=intercept_ranef,
-            μ_X=μ_X,
-            σ_X=σ_X,
-            prior=custom_prior,
-        )
-            α ~ prior.intercept
-            β ~ filldist(prior.predictors, predictors)
-            μ = α .+ X * β
-            if !isempty(intercept_ranef)
-                τ ~ mad(y) * truncated(TDist(3), 0, Inf)
-                zⱼ ~ filldist(Normal(), n_gr)
-                αⱼ = zⱼ .* τ
-                μ .+= αⱼ[idxs]
-            end
-            #TODO: implement random-effects slope
-            y ~ arraydist(LazyArray(@~ LogPoisson.(μ)))
-            return (; α, β, τ, zⱼ, αⱼ, y)
-        end
-        return poisson_model_ranef(y, X)
-    else
-        if priors isa DefaultPrior
-            custom_prior = CustomPrior(TDist(3), 2.5 * TDist(3), nothing)
-        else
-            custom_prior = priors
-        end
-        @model function poisson_model(
-            y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=custom_prior
-        )
-            α ~ prior.intercept
-            β ~ filldist(prior.predictors, predictors)
-            y ~ arraydist(LazyArray(@~ LogPoisson.(α .+ X * β)))
-            return (; α, β, y)
-        end
-        return poisson_model(y, X)
-    end
-end
-
-function turing_model(
-    formula::FormulaTerm, data::D, model::NegBin; priors=DefaultPrior(), standardize=false
-) where {D}
-    # extract y, X and Z
-    y = data_response(formula, data)
-    X = data_fixed_effects(formula, data)
-    Z = data_random_effects(formula, data)
-
-    # μ and σ identities
-    μ_X = 0
-    σ_X = 1
-    μ_y = 0
-    σ_y = 1
-
-    if standardize
-        μ_X, σ_X, X = standardize_predictors(X)
-        μ_y, σ_y, y = standardize_predictors(y)
-        if !isnothing(Z)
-            #TODO: implement random-effects slope
-            throw(
-                ArgumentError(
-                    "TuringGLM currently does not support random-effects for slope terms"
-                ),
-            )
-        end
-    end
-
-    # Random-Effects Conditionals
-    if has_ranef(formula)
-        if priors isa DefaultPrior
-            custom_prior = CustomPrior(TDist(3), 2.5 * TDist(3), Gamma(0.01, 0.01))
-        else
-            custom_prior = priors
-        end
-        intercept_ranef = intercept_per_ranef(ranef(formula))
-        group_var = first(ranef(formula)).rhs
-        idx = get_idx(term(group_var), data)
-        # print for the user the idx
-        println("The idx are $(last(idx))\n")
-        @model function negbin_model_ranef(
-            y,
-            X;
-            predictors=size(X, 2),
-            idxs=first(idx),
-            n_gr=length(unique(first(idx))),
-            intercept_ranef=intercept_ranef,
-            μ_X=μ_X,
-            σ_X=σ_X,
-            prior=custom_prior,
-        )
-            α ~ prior.intercept
-            β ~ filldist(prior.predictors, predictors)
-            ϕ⁻ ~ prior.auxiliary
-            ϕ = 1 / ϕ⁻
-            μ = α .+ X * β
-            if !isempty(intercept_ranef)
-                τ ~ mad(y) * truncated(TDist(3), 0, Inf)
-                zⱼ ~ filldist(Normal(), n_gr)
-                αⱼ = zⱼ .* τ
-                μ .+= αⱼ[idxs]
-            end
-            #TODO: implement random-effects slope
-            y ~ arraydist(LazyArray(@~ NegativeBinomial2.(exp.(μ), ϕ)))
-            return (; α, β, ϕ, τ, zⱼ, αⱼ, y)
-        end
-        return negbin_model_ranef(y, X)
-    else
-        if priors isa DefaultPrior
-            custom_prior = CustomPrior(TDist(3), 2.5 * TDist(3), Gamma(0.01, 0.01))
-        else
-            custom_prior = priors
-        end
-        @model function negbin_model(
-            y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=custom_prior
-        )
-            α ~ prior.intercept
-            β ~ filldist(prior.predictors, predictors)
-            ϕ⁻ ~ prior.auxiliary
-            ϕ = 1 / ϕ⁻
-            y ~ arraydist(LazyArray(@~ NegativeBinomial2.(exp.(α .+ X * β), ϕ)))
-            return (; α, β, ϕ, y)
-        end
-        return negbin_model(y, X)
-    end
-end
-
-function turing_model(
+function _turing_model(
     formula::FormulaTerm,
-    data::D,
-    model::Union{UnivariateDistribution,Model},
-    priors=DefaultPrior(),
-    standardize=false,
-) where {D}
+    data,
+    ::Type{T};
+    priors::Prior=DefaultPrior(),
+    standardize::Bool=false,
+) where {T<:UnivariateDistribution}
+    # extract y, X and Z
+    y = data_response(formula, data)
+    X = data_fixed_effects(formula, data)
+    Z = data_random_effects(formula, data)
+
+    # μ and σ identities
+    μ_X = 0
+    σ_X = 1
+    μ_y = 0
+    σ_y = 1
+
+    if standardize
+        μ_X, σ_X, X = standardize_predictors(X)
+        μ_y, σ_y, y = standardize_predictors(y)
+        if !isnothing(Z)
+            #TODO: implement random-effects slope
+            throw(
+                ArgumentError(
+                    "TuringGLM currently does not support random-effects for slope terms"
+                ),
+            )
+        end
+    end
+
+    # Random-Effects Conditionals
+    prior = _prior(priors, y, T)
+    ranef = TuringGLM.ranef(formula)
+    model = if ranef === nothing
+        _model(μ_X, σ_X, prior, T)
+    else
+        intercept_ranef = intercept_per_ranef(ranef)
+        group_var = first(ranef).rhs
+        idx = get_idx(term(group_var), data)
+        # print for the user the idx
+        println("The idx are $(last(idx))\n")
+        _model(μ_X, σ_X, prior, intercept_ranef, idx, T)
+    end
+    return model(y, X)
+end
+
+# Default priors
+_prior(prior::Prior, y, ::Type{<:UnivariateDistribution}) = prior
+function _prior(::DefaultPrior, y, ::Type{Gaussian})
+    return CustomPrior(TDist(3), median(y) + mad(y) * TDist(3), nothing)
+end
+function _prior(::DefaultPrior, y, ::Type{TDist})
+    return CustomPrior(TDist(3), median(y) + mad(y) * TDist(3), Gamma(2, 0.1))
+end
+function _prior(::DefaultPrior, y, ::Type{Bernoulli})
+    return CustomPrior(TDist(3), 2.5 * TDist(3), nothing)
+end
+function _prior(::DefaultPrior, y, ::Type{Poisson})
+    return CustomPrior(TDist(3), 2.5 * TDist(3), nothing)
+end
+function _prior(::DefaultPrior, y, ::Type{NegativeBinomial})
+    return CustomPrior(TDist(3), 2.5 * TDist(3), Gamma(0.01, 0.01))
+end
+function _prior(::DefaultPrior, y, T::Type{<:UnivariateDistribution})
     return throw(
         ArgumentError(
-            "Could not find $(model) likelihood. Please check the documentation for supported likelihoods.",
+            "No default prior implemented for likelihood type $T. Please check the documentation for supported likelihoods.",
         ),
     )
 end
+
+# Models with Gaussian likelihood
+function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Gaussian})
+    idxs = first(idx)
+    n_gr = length(unique(first(idx)))
+    @model function normal_model_ranef(
+        y,
+        X;
+        predictors=size(X, 2),
+        idxs=idxs,
+        n_gr=n_gr,
+        intercept_ranef=intercept_ranef,
+        μ_X=μ_X,
+        σ_X=σ_X,
+        prior=prior,
+        residual=1 / std(y),
+    )
+        α ~ prior.intercept
+        β ~ filldist(prior.predictors, predictors)
+        σ ~ Exponential(residual)
+        μ = α .+ X * β
+        if !isempty(intercept_ranef)
+            τ ~ mad(y) * truncated(TDist(3), 0, Inf)
+            zⱼ ~ filldist(Normal(), n_gr)
+            αⱼ = zⱼ .* τ
+            μ .+= αⱼ[idxs]
+        end
+        #TODO: implement random-effects slope
+        y ~ MvNormal(μ, σ^2 * I)
+        return (; α, β, σ, τ, zⱼ, αⱼ, y)
+    end
+end
+function _model(μ_X, σ_X, prior, ::Type{Gaussian})
+    @model function normal_model(
+        y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=prior, residual=1 / std(y)
+    )
+        α ~ prior.intercept
+        β ~ filldist(prior.predictors, predictors)
+        σ ~ Exponential(residual)
+        y ~ MvNormal(α .+ X * β, σ^2 * I)
+        return (; α, β, σ, y)
+    end
+end
+
+# Models with Student-t likelihood
+function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{TDist})
+    @model function student_model_ranef(
+        y,
+        X;
+        predictors=size(X, 2),
+        idxs=first(idx),
+        n_gr=length(unique(first(idx))),
+        intercept_ranef=intercept_ranef,
+        μ_X=μ_X,
+        σ_X=σ_X,
+        prior=prior,
+        residual=1 / std(y),
+    )
+        α ~ prior.intercept
+        β ~ filldist(prior.predictors, predictors)
+        σ ~ Exponential(residual)
+        ν ~ prior.auxiliary
+        μ = α .+ X * β
+        if !isempty(intercept_ranef)
+            τ ~ 0 + mad(y) * truncated(TDist(3), 0, Inf)
+            zⱼ ~ filldist(Normal(), n_gr)
+            αⱼ = zⱼ .* τ
+            μ .+= αⱼ[idxs]
+        end
+        #TODO: implement random-effects slope
+        y ~ arraydist(μ + σ * TDist.(ν))
+        return (; α, β, σ, ν, τ, zⱼ, αⱼ, y)
+    end
+end
+function _model(μ_X, σ_X, prior, ::Type{TDist})
+    @model function student_model(
+        y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=prior, residual=1 / std(y)
+    )
+        α ~ prior.intercept
+        β ~ filldist(prior.predictors, predictors)
+        σ ~ Exponential(residual)
+        ν ~ prior.auxiliary
+        y ~ arraydist((α .+ X * β) .+ σ .* TDist.(ν))
+        return (; α, β, σ, ν, y)
+    end
+end
+
+# Models with Bernoulli likelihood
+function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Bernoulli})
+    @model function bernoulli_model_ranef(
+        y,
+        X;
+        predictors=size(X, 2),
+        idxs=first(idx),
+        n_gr=length(unique(first(idx))),
+        intercept_ranef=intercept_ranef,
+        μ_X=μ_X,
+        σ_X=σ_X,
+        prior=prior,
+    )
+        α ~ prior.intercept
+        β ~ filldist(prior.predictors, predictors)
+        μ = α .+ X * β
+        if !isempty(intercept_ranef)
+            τ ~ mad(y) * truncated(TDist(3), 0, Inf)
+            zⱼ ~ filldist(Normal(), n_gr)
+            αⱼ = zⱼ .* τ
+            μ .+= αⱼ[idxs]
+        end
+        #TODO: implement random-effects slope
+        y ~ arraydist(LazyArray(@~ BernoulliLogit.(μ)))
+        return (; α, β, τ, zⱼ, αⱼ, y)
+    end
+end
+function _model(μ_X, σ_X, prior, ::Type{Bernoulli})
+    @model function bernoulli_model(
+        y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=prior
+    )
+        α ~ prior.intercept
+        β ~ filldist(prior.predictors, predictors)
+        y ~ arraydist(LazyArray(@~ BernoulliLogit.(α .+ X * β)))
+        return (; α, β, y)
+    end
+end
+
+# Models with Poisson likelihood
+function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Poisson})
+    @model function poisson_model_ranef(
+        y,
+        X;
+        predictors=size(X, 2),
+        idxs=first(idx),
+        n_gr=length(unique(first(idx))),
+        intercept_ranef=intercept_ranef,
+        μ_X=μ_X,
+        σ_X=σ_X,
+        prior=prior,
+    )
+        α ~ prior.intercept
+        β ~ filldist(prior.predictors, predictors)
+        μ = α .+ X * β
+        if !isempty(intercept_ranef)
+            τ ~ mad(y) * truncated(TDist(3), 0, Inf)
+            zⱼ ~ filldist(Normal(), n_gr)
+            αⱼ = zⱼ .* τ
+            μ .+= αⱼ[idxs]
+        end
+        #TODO: implement random-effects slope
+        y ~ arraydist(LazyArray(@~ LogPoisson.(μ)))
+        return (; α, β, τ, zⱼ, αⱼ, y)
+    end
+end
+function _model(μ_X, σ_X, prior, ::Type{Poisson})
+    @model function poisson_model(
+        y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=prior
+    )
+        α ~ prior.intercept
+        β ~ filldist(prior.predictors, predictors)
+        y ~ arraydist(LazyArray(@~ LogPoisson.(α .+ X * β)))
+        return (; α, β, y)
+    end
+end
+
+# Models with NegativeBinomial likelihood
+function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{NegativeBinomial})
+    @model function negbin_model_ranef(
+        y,
+        X;
+        predictors=size(X, 2),
+        idxs=first(idx),
+        n_gr=length(unique(first(idx))),
+        intercept_ranef=intercept_ranef,
+        μ_X=μ_X,
+        σ_X=σ_X,
+        prior=prior,
+    )
+        α ~ prior.intercept
+        β ~ filldist(prior.predictors, predictors)
+        ϕ⁻ ~ prior.auxiliary
+        ϕ = 1 / ϕ⁻
+        μ = α .+ X * β
+        if !isempty(intercept_ranef)
+            τ ~ mad(y) * truncated(TDist(3), 0, Inf)
+            zⱼ ~ filldist(Normal(), n_gr)
+            αⱼ = zⱼ .* τ
+            μ .+= αⱼ[idxs]
+        end
+        #TODO: implement random-effects slope
+        y ~ arraydist(LazyArray(@~ NegativeBinomial2.(exp.(μ), ϕ)))
+        return (; α, β, ϕ, τ, zⱼ, αⱼ, y)
+    end
+end
+function _model(μ_X, σ_X, prior, ::Type{NegativeBinomial})
+    @model function negbin_model(y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=prior)
+        α ~ prior.intercept
+        β ~ filldist(prior.predictors, predictors)
+        ϕ⁻ ~ prior.auxiliary
+        ϕ = 1 / ϕ⁻
+        y ~ arraydist(LazyArray(@~ NegativeBinomial2.(exp.(α .+ X * β), ϕ)))
+        return (; α, β, ϕ, y)
+    end
+end
+
+# Unsupported models
+function _model(μ_X, σ_X, prior, intercept_ranef, idx, T::Type{<:UnivariateDistribution})
+    return throw(
+        ArgumentError(
+            "No Turing model implemented for likelihood type $T. Please check the documentation for supported likelihoods.",
+        ),
+    )
+end
+function _model(μ_X, σ_X, prior, T::Type{<:UnivariateDistribution})
+    return throw(
+        ArgumentError(
+            "No Turing model implemented for likelihood type $T. Please check the documentation for supported likelihoods.",
+        ),
+    )
+end
+
 """
     NegativeBinomial2(μ, ϕ)
 

@@ -31,7 +31,14 @@
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.3863 atol = 0.2
         end
         @testset "explicit calling Gaussian" begin
-            m = turing_model(f, kidiq, Gaussian())
+            m = turing_model(f, kidiq; model=Gaussian)
+            chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            @test summarystats(chn)[:α, :mean] ≈ 29.30 atol = 2.0
+            @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.533 atol = 0.2
+            @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.593 atol = 0.2
+        end
+        @testset "alias" begin
+            m = turing_model(f, kidiq; model=Normal)
             chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 29.30 atol = 2.0
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.533 atol = 0.2
@@ -41,7 +48,7 @@
     @testset "Student Model" begin
         f = @formula(kid_score ~ mom_iq * mom_hs)
         @testset "standardize=false" begin
-            m = turing_model(f, kidiq, Student())
+            m = turing_model(f, kidiq; model=TDist)
             chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 40.380 atol = 2.0
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.478 atol = 0.2
@@ -51,7 +58,7 @@
 
         @testset "custom_priors" begin
             priors = CustomPrior(Normal(), Normal(28, 5), Exponential(2))
-            m = turing_model(f, kidiq, Student(); priors)
+            m = turing_model(f, kidiq; model=TDist, priors)
             chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 35.506 atol = 2.0
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.522 atol = 0.2
@@ -62,7 +69,7 @@
     @testset "Logistic Model" begin
         f = @formula(switch ~ arsenic + dist + assoc + educ)
         @testset "standardize=false" begin
-            m = turing_model(f, wells, Logistic())
+            m = turing_model(f, wells; model=Bernoulli)
             chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ -0.153 atol = 0.2
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.467 atol = 0.2
@@ -71,7 +78,7 @@
 
         @testset "custom_priors" begin
             priors = CustomPrior(Normal(), Normal(), nothing)
-            m = turing_model(f, wells, Logistic(); priors)
+            m = turing_model(f, wells; model=Bernoulli, priors)
             chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ -0.155 atol = 0.2
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.468 atol = 0.2
@@ -81,7 +88,7 @@
     @testset "Pois Model" begin
         f = @formula(y ~ roach1 + treatment + senior + exposure2)
         @testset "standardize=false" begin
-            m = turing_model(f, roaches, Pois())
+            m = turing_model(f, roaches; model=Poisson)
             chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 2.969 atol = 0.5
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.006 atol = 0.2
@@ -90,7 +97,7 @@
 
         @testset "custom_priors" begin
             priors = CustomPrior(Normal(2, 5), Normal(), nothing)
-            m = turing_model(f, roaches, Pois(); priors)
+            m = turing_model(f, roaches; model=Poisson, priors)
             chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 2.963 atol = 0.5
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.006 atol = 0.2
@@ -100,7 +107,7 @@
     @testset "NegBin Model" begin
         f = @formula(y ~ roach1 + treatment + senior + exposure2)
         @testset "standardize=false" begin
-            m = turing_model(f, roaches, NegBin())
+            m = turing_model(f, roaches; model=NegativeBinomial)
             chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 2.448 atol = 0.5
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.013 atol = 0.2
@@ -110,7 +117,7 @@
 
         @testset "custom_priors" begin
             priors = CustomPrior(Normal(), Normal(2, 5), Exponential(0.5))
-            m = turing_model(f, roaches, NegBin(); priors)
+            m = turing_model(f, roaches; model=NegativeBinomial, priors)
             chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 2.422 atol = 0.5
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.013 atol = 0.2
@@ -128,8 +135,7 @@
         @test quantile(chn)[Symbol("zⱼ[2]"), Symbol("50.0%")] ≈ -1.422 atol = 0.5
     end
     @testset "Unsupported Model Likelihoods" begin
-        @test_throws ArgumentError turing_model(@formula(y ~ x), nt_str, Normal())
-        @test_throws ArgumentError turing_model(@formula(y ~ x), nt_str, Binomial())
+        @test_throws ArgumentError turing_model(@formula(y ~ x), nt_str; model=Binomial)
     end
     @testset "NegativeBinomial2" begin
         @test T.NegativeBinomial2(0, 1) == T.NegativeBinomial(1, 1)
