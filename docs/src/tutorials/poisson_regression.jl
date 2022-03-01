@@ -57,12 +57,11 @@ fm = @formula(y ~ roach1 + treatment + senior)
 
 # ╔═╡ 65f4f379-e9a5-4571-bc80-77c024f3f560
 md"""
-We instantiate our model with `turing_model` passing a third argument `Pois()` to
-indicate that the model is a Poisson Regression
+We instantiate our model with `turing_model` passing a keyword argument `model=Poisson` to indicate that the model is a Poisson Regression:
 """
 
 # ╔═╡ 9147ed9e-a047-42ca-aa36-f522fad8388b
-model = turing_model(fm, roaches, Pois());
+model = turing_model(fm, roaches; model=Poisson);
 
 # ╔═╡ aeeac527-2c32-407f-84a1-912cc74f51b7
 md"""
