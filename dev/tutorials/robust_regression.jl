@@ -55,12 +55,11 @@ fm = @formula(kid_score ~ mom_hs * mom_iq)
 
 # ╔═╡ 4f9ff3fd-3f04-49a5-924e-aa23702e75a0
 md"""
-We instantiate our model with `turing_model` passing a third argument `Student()` to
-indicate that the model is a robust regression with the Student's t-distribution:
+We instantiate our model with `turing_model` passing a keyword argument `model=TDist` to indicate that the model is a robust regression with the Student's t-distribution:
 """
 
 # ╔═╡ 3f4241d4-1c76-4d7c-99c1-aaa2111385f9
-model = turing_model(fm, kidiq, Student());
+model = turing_model(fm, kidiq; model=TDist);
 
 # ╔═╡ 7bbe4fe4-bcaf-4699-88e4-0dff92250d30
 chn = sample(model, NUTS(), 2_000);
