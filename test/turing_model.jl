@@ -30,14 +30,7 @@
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.539 atol = 0.2
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.3863 atol = 0.2
         end
-        @testset "explicit calling Gaussian" begin
-            m = turing_model(f, kidiq; model=Gaussian)
-            chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
-            @test summarystats(chn)[:α, :mean] ≈ 29.30 atol = 2.0
-            @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.533 atol = 0.2
-            @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.593 atol = 0.2
-        end
-        @testset "alias" begin
+        @testset "explicit calling Normal" begin
             m = turing_model(f, kidiq; model=Normal)
             chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 29.30 atol = 2.0

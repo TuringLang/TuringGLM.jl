@@ -50,7 +50,7 @@ For hierarchical models, only single random-intercept hierarchical models are su
 
 Currently, for likelihoods `TuringGLM.jl` supports:
 
-* `Gaussian` (the default if not specified): linear regression
+* `Normal` (the default if not specified): linear regression
 * `TDist`: robust linear regression
 * `Bernoulli`: logistic regression
 * `Poisson`: Poisson count data regression

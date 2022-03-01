@@ -1,5 +1,5 @@
 """
-    turing_model(formula, data; model=Gaussian, priors=DefaultPrior(), standardize=false)
+    turing_model(formula, data; model=Normal, priors=DefaultPrior(), standardize=false)
 
 Create a Turing model using `formula` syntax and a `data` source.
 
@@ -43,7 +43,7 @@ The most popular ones are `DataFrame`s and `NamedTuple`s.
 It has to be a subtype of `Distributions.UnivariateDistribution`.
 Currently, `TuringGLM.jl` supports:
 
-* `Gaussian` (the default if not specified): linear regression
+* `Normal` (the default if not specified): linear regression
 * `TDist`: robust linear regression
 * `Bernoulli`: logistic regression
 * `Poisson`: Poisson count data regression
@@ -136,7 +136,7 @@ end
 
 # Default priors
 _prior(prior::Prior, y, ::Type{<:UnivariateDistribution}) = prior
-function _prior(::DefaultPrior, y, ::Type{Gaussian})
+function _prior(::DefaultPrior, y, ::Type{Normal})
     return CustomPrior(TDist(3), median(y) + mad(y) * TDist(3), nothing)
 end
 function _prior(::DefaultPrior, y, ::Type{TDist})
@@ -159,8 +159,8 @@ function _prior(::DefaultPrior, y, T::Type{<:UnivariateDistribution})
     )
 end
 
-# Models with Gaussian likelihood
-function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Gaussian})
+# Models with Normal likelihood
+function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Normal})
     idxs = first(idx)
     n_gr = length(unique(first(idx)))
     @model function normal_model_ranef(
@@ -190,7 +190,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Gaussian})
         return (; α, β, σ, τ, zⱼ, αⱼ, y)
     end
 end
-function _model(μ_X, σ_X, prior, ::Type{Gaussian})
+function _model(μ_X, σ_X, prior, ::Type{Normal})
     @model function normal_model(
         y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=prior, residual=1 / std(y)
     )

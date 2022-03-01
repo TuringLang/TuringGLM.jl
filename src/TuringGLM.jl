@@ -31,7 +31,6 @@ using Reexport: @reexport
         Bernoulli,
         Binomial,
         Gamma,
-        Gaussian,
         InverseGaussian,
         NegativeBinomial,
         Normal,

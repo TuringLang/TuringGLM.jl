@@ -64,7 +64,7 @@ priors = CustomPrior(Normal(0, 2.5), Normal(10, 20), nothing);
 
 # ╔═╡ 56498ac7-3476-42eb-9c12-078562fff51d
 md"""
-We instantiate our model with `turing_model` without specifying any model, thus the default model will be used (`model=Gaussian`).
+We instantiate our model with `turing_model` without specifying any model, thus the default model will be used (`model=Normal`).
 Notice that we are specifying the `priors` keyword argument:
 """
 
