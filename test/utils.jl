@@ -1,5 +1,5 @@
-@testset "utils" begin
-    @testset "center_predictors" begin
+@timed_testset "utils" begin
+    @timed_testset "center_predictors" begin
         @testset "NamedTuples" begin
             f = @formula(y_int ~ x_float + x_cat)
             X = T.data_fixed_effects(f, nt_str)
@@ -29,7 +29,7 @@
         end
     end
 
-    @testset "standardize_predictors" begin
+    @timed_testset "standardize_predictors" begin
         @testset "NamedTuples" begin
             f = @formula(y_int ~ x_float + x_cat)
             y = T.data_response(f, nt_str)
