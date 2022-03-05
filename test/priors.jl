@@ -1,4 +1,4 @@
-@testset "prior.jl" begin
+@timed_testset "priors" begin
     @testset "types" begin
         @test DefaultPrior() isa T.Prior
 

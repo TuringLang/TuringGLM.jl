@@ -1,4 +1,4 @@
-@testset "data_constructors.jl" begin
+@timed_testset "data_constructors" begin
     @testset "data_response" begin
         @testset "NamedTuples" begin
             expected = [2, 3, 4, 5]

@@ -1,10 +1,10 @@
-@testset "turing_model.jl" begin
+@timed_testset "turing_model" begin
     DATA_DIR = joinpath("..", "data")
     kidiq = CSV.read(joinpath(DATA_DIR, "kidiq.csv"), DataFrame)
     wells = CSV.read(joinpath(DATA_DIR, "wells.csv"), DataFrame)
     roaches = CSV.read(joinpath(DATA_DIR, "roaches.csv"), DataFrame)
     cheese = CSV.read(joinpath(DATA_DIR, "cheese.csv"), DataFrame)
-    @testset "Gaussian Model" begin
+    @timed_testset "Gaussian Model" begin
         f = @formula(kid_score ~ mom_iq * mom_hs)
         @testset "standardize=false" begin
             m = turing_model(f, kidiq)
@@ -38,7 +38,7 @@
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.593 atol = 0.2
         end
     end
-    @testset "Student Model" begin
+    @timed_testset "Student Model" begin
         f = @formula(kid_score ~ mom_iq * mom_hs)
         @testset "standardize=false" begin
             m = turing_model(f, kidiq, Student())
@@ -59,7 +59,7 @@
             @test quantile(chn)[:ν, Symbol("50.0%")] ≈ 1.178 atol = 0.5
         end
     end
-    @testset "Logistic Model" begin
+    @timed_testset "Logistic Model" begin
         f = @formula(switch ~ arsenic + dist + assoc + educ)
         @testset "standardize=false" begin
             m = turing_model(f, wells, Logistic())
@@ -78,7 +78,7 @@
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.009 atol = 0.2
         end
     end
-    @testset "Pois Model" begin
+    @timed_testset "Pois Model" begin
         f = @formula(y ~ roach1 + treatment + senior + exposure2)
         @testset "standardize=false" begin
             m = turing_model(f, roaches, Pois())
@@ -97,7 +97,7 @@
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.5145 atol = 0.2
         end
     end
-    @testset "NegBin Model" begin
+    @timed_testset "NegBin Model" begin
         f = @formula(y ~ roach1 + treatment + senior + exposure2)
         @testset "standardize=false" begin
             m = turing_model(f, roaches, NegBin())
@@ -118,7 +118,7 @@
             @test quantile(chn)[:ϕ⁻, Symbol("50.0%")] ≈ 3.56 atol = 0.2
         end
     end
-    @testset "Hierarchical Model" begin
+    @timed_testset "Hierarchical Model" begin
         f = @formula(y ~ (1 | cheese) + background)
         m = turing_model(f, cheese)
         chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)

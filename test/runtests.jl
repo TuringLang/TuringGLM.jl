@@ -5,6 +5,7 @@ using DataFrames
 using CategoricalArrays: CategoricalValue
 using CategoricalArrays: categorical, levels
 using Statistics: mean, std
+using TimerOutputs: TimerOutputs, @timeit
 using Random: seed!
 
 const T = TuringGLM
@@ -29,9 +30,23 @@ df_str = DataFrame(nt_str)
 
 df_cat = DataFrame(nt_cat)
 
-@testset "TuringGLM.jl" begin
+# To capture time and allocation information.
+const TIMEROUTPUT = TimerOutputs.TimerOutput()
+macro timed_testset(str, block)
+    return quote
+        @timeit TIMEROUTPUT "$($(esc(str)))" begin
+            @testset "$($(esc(str)))" begin
+                $(esc(block))
+            end
+        end
+    end
+end
+
+@testset "TuringGLM" begin
     include("data_constructors.jl")
     include("utils.jl")
     include("priors.jl")
     include("turing_model.jl")
 end
+
+show(TIMEROUTPUT; compact=true, sortby=:firstexec)

@@ -112,7 +112,8 @@ function turing_model(
     # Random-Effects Conditionals
     if has_ranef(formula)
         if priors isa DefaultPrior
-            custom_prior = CustomPrior(TDist(3), median(y) + mad(y) * TDist(3), nothing)
+            intercept = median(y) + mad(y; normalize=false) * TDist(3)
+            custom_prior = CustomPrior(TDist(3), intercept, nothing)
         else
             custom_prior = priors
         end
@@ -138,7 +139,7 @@ function turing_model(
             σ ~ Exponential(residual)
             μ = α .+ X * β
             if !isempty(intercept_ranef)
-                τ ~ mad(y) * truncated(TDist(3), 0, Inf)
+                τ ~ mad(y; normalize=false) * truncated(TDist(3), 0, Inf)
                 zⱼ ~ filldist(Normal(), n_gr)
                 αⱼ = zⱼ .* τ
                 μ .+= αⱼ[idxs]
@@ -150,7 +151,8 @@ function turing_model(
         return normal_model_ranef(y, X)
     else
         if priors isa DefaultPrior
-            custom_prior = CustomPrior(TDist(3), median(y) + mad(y) * TDist(3), nothing)
+            intercept = median(y) + mad(y; normalize=false) * TDist(3)
+            custom_prior = CustomPrior(TDist(3), intercept, nothing)
         else
             custom_prior = priors
         end
@@ -210,9 +212,8 @@ function turing_model(
     # Random-Effects Conditionals
     if has_ranef(formula)
         if priors isa DefaultPrior
-            custom_prior = CustomPrior(
-                TDist(3), median(y) + mad(y) * TDist(3), Gamma(2, 0.1)
-            )
+            intercept =  median(y) + mad(y; normalize=false) * TDist(3)
+            custom_prior = CustomPrior(TDist(3), intercept, Gamma(2, 0.1))
         else
             custom_prior = priors
         end
@@ -239,7 +240,7 @@ function turing_model(
             ν ~ prior.auxiliary
             μ = α .+ X * β
             if !isempty(intercept_ranef)
-                τ ~ 0 + mad(y) * truncated(TDist(3), 0, Inf)
+                τ ~ 0 + mad(y; normalize=false) * truncated(TDist(3), 0, Inf)
                 zⱼ ~ filldist(Normal(), n_gr)
                 αⱼ = zⱼ .* τ
                 μ .+= αⱼ[idxs]
@@ -251,9 +252,8 @@ function turing_model(
         return student_model_ranef(y, X)
     else
         if priors isa DefaultPrior
-            custom_prior = CustomPrior(
-                TDist(3), median(y) + mad(y) * TDist(3), Gamma(2, 0.1)
-            )
+            intercept = median(y) + mad(y; normalize=false) * TDist(3)
+            custom_prior = CustomPrior(TDist(3), intercept, Gamma(2, 0.1))
         else
             custom_prior = priors
         end
@@ -331,7 +331,7 @@ function turing_model(
             β ~ filldist(prior.predictors, predictors)
             μ = α .+ X * β
             if !isempty(intercept_ranef)
-                τ ~ mad(y) * truncated(TDist(3), 0, Inf)
+                τ ~ mad(y; normalize=false) * truncated(TDist(3), 0, Inf)
                 zⱼ ~ filldist(Normal(), n_gr)
                 αⱼ = zⱼ .* τ
                 μ .+= αⱼ[idxs]
@@ -413,7 +413,7 @@ function turing_model(
             β ~ filldist(prior.predictors, predictors)
             μ = α .+ X * β
             if !isempty(intercept_ranef)
-                τ ~ mad(y) * truncated(TDist(3), 0, Inf)
+                τ ~ mad(y; normalize=false) * truncated(TDist(3), 0, Inf)
                 zⱼ ~ filldist(Normal(), n_gr)
                 αⱼ = zⱼ .* τ
                 μ .+= αⱼ[idxs]
@@ -497,7 +497,7 @@ function turing_model(
             ϕ = 1 / ϕ⁻
             μ = α .+ X * β
             if !isempty(intercept_ranef)
-                τ ~ mad(y) * truncated(TDist(3), 0, Inf)
+                τ ~ mad(y; normalize=false) * truncated(TDist(3), 0, Inf)
                 zⱼ ~ filldist(Normal(), n_gr)
                 αⱼ = zⱼ .* τ
                 μ .+= αⱼ[idxs]
