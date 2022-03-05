@@ -38,7 +38,7 @@
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.593 atol = 0.2
         end
     end
-    @timed_testset "Student Model" begin
+    @timed_testset "TDist Model" begin
         f = @formula(kid_score ~ mom_iq * mom_hs)
         @testset "standardize=false" begin
             m = turing_model(f, kidiq; model=TDist)
@@ -59,7 +59,7 @@
             @test quantile(chn)[:ν, Symbol("50.0%")] ≈ 1.178 atol = 0.5
         end
     end
-    @timed_testset "Logistic Model" begin
+    @timed_testset "Bernoulli Model" begin
         f = @formula(switch ~ arsenic + dist + assoc + educ)
         @testset "standardize=false" begin
             m = turing_model(f, wells; model=Bernoulli)
@@ -78,7 +78,7 @@
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.009 atol = 0.2
         end
     end
-    @timed_testset "Pois Model" begin
+    @timed_testset "Poisson Model" begin
         f = @formula(y ~ roach1 + treatment + senior + exposure2)
         @testset "standardize=false" begin
             m = turing_model(f, roaches; model=Poisson)
@@ -97,7 +97,7 @@
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.5145 atol = 0.2
         end
     end
-    @timed_testset "NegBin Model" begin
+    @timed_testset "NegativeBinomial Model" begin
         f = @formula(y ~ roach1 + treatment + senior + exposure2)
         @testset "standardize=false" begin
             m = turing_model(f, roaches; model=NegativeBinomial)
