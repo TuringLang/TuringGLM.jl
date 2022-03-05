@@ -48,13 +48,13 @@ The most popular ones are `DataFrame`s and `NamedTuple`s.
 TuringGLM supports non-hiearchical and hierarchical models.
 For hierarchical models, only single random-intercept hierarchical models are supported.
 
-For likelihoods, `TuringGLM.jl` supports:
+Currently, for likelihoods `TuringGLM.jl` supports:
 
-* `Gaussian()` (the default if not specified): linear regression
-* `Student()`: robust linear regression
-* `Logistic()`: logistic regression
-* `Pois()`: Poisson count data regression
-* `NegBin()`: negative binomial robust count data regression
+* `Normal` (the default if not specified): linear regression
+* `TDist`: robust linear regression
+* `Bernoulli`: logistic regression
+* `Poisson`: Poisson count data regression
+* `NegativeBinomial`: negative binomial robust count data regression
 
 ## Tutorials
 

@@ -58,11 +58,11 @@ fm = @formula(switch ~ dist + arsenic + assoc + educ)
 
 # ╔═╡ 2ebfa422-f8a5-44d3-8f2c-a34d7832d3f2
 md"""
-Now we instantiate our model with `turing_model` passing a third argument `Logistic()` to indicate that the model is a logistic regression:
+Now we instantiate our model with `turing_model` passing a keyword argument `model=Bernoulli` to indicate that the model is a logistic regression:
 """
 
 # ╔═╡ 1f1158ce-73f0-49fd-a48a-af3b36376030
-model = turing_model(fm, wells, Logistic());
+model = turing_model(fm, wells; model=Bernoulli);
 
 # ╔═╡ ebe074cb-7bad-4b52-9c9d-b9752af4bedd
 chn = sample(model, NUTS(), 2_000);

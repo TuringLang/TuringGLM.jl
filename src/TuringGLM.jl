@@ -41,11 +41,9 @@ end
 include("utils.jl")
 include("data_constructors.jl")
 include("priors.jl")
-include("model.jl")
 include("turing_model.jl")
 
 export turing_model
 export CustomPrior, DefaultPrior
-export Gaussian, Student, Logistic, Pois, NegBin
 
 end # module
