@@ -320,6 +320,7 @@ function _model(μ_X, σ_X, prior, ::Type{Poisson})
         return (; α, β, y)
     end
 end
+
 # Models with NegativeBinomial likelihood
 function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{NegativeBinomial})
     @model function negbin_model_ranef(
