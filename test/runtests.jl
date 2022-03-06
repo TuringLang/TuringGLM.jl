@@ -10,6 +10,9 @@ using Random: seed!
 
 const T = TuringGLM
 
+# Decreases running time by about 10%.
+Turing.setprogress!(false)
+
 x_float = [1.1, 2.3, 3.14, 3.65]
 x_int = [1, 2, 3, 4]
 y_float = [2.3, 3.4, 4.5, 5.4]
