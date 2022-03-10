@@ -9,7 +9,7 @@ function build()
     use_distributed = false
     output_format = documenter_output
     bopts = BuildOptions(tutorials_dir; use_distributed, output_format)
-    parallel_build(bopts)
+    build_notebooks(bopts)
     return nothing
 end
 
