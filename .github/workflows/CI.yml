@@ -9,12 +9,12 @@ concurrency:
   # Skip intermediate builds: always.
   # Cancel intermediate builds: only if it is a pull request build.
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+  cancel-in-progress: false
 jobs:
   test:
     name: Julia CI
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    timeout-minutes: 90
     continue-on-error: ${{ matrix.version == 'nightly' }}
     strategy:
       fail-fast: false
@@ -39,6 +39,8 @@ jobs:
       - uses: julia-actions/julia-runtest@v1
         with:
           coverage: 'false'
+        env:
+          JULIA_NUM_THREADS: '2'
   docs:
     name: Documentation
     runs-on: ubuntu-latest
