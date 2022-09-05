@@ -142,7 +142,9 @@ function _prior(::DefaultPrior, y, ::Type{Normal})
 end
 function _prior(::DefaultPrior, y, ::Type{TDist})
     m = median(y)
-    return CustomPrior(TDist(3), m + mad(y; center=m, normalize=true) * TDist(3), Gamma(2, 0.1))
+    return CustomPrior(
+        TDist(3), m + mad(y; center=m, normalize=true) * TDist(3), Gamma(2, 0.1)
+    )
 end
 function _prior(::DefaultPrior, y, ::Type{Bernoulli})
     return CustomPrior(TDist(3), 2.5 * TDist(3), nothing)
