@@ -339,7 +339,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{NegativeBinomial
         ϕ⁻ ~ prior.auxiliary
         ϕ = 1 / ϕ⁻
         if isempty(intercept_ranef)
-            μ = α .+ X * β            
+            μ = α .+ X * β
         else
             τ ~ mad(y) * truncated(TDist(3), 0, Inf)
             zⱼ ~ filldist(Normal(), n_gr)
