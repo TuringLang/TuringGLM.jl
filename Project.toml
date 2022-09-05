@@ -1,6 +1,6 @@
 name = "TuringGLM"
 uuid = "0004c1f4-53c5-4d43-a221-a1dac6cf6b74"
-authors = ["Jose Storopoli <thestoropoli@gmail.com>, Rik Huijzer <t.h.huijzer@rug.nl>, and contributors"]
+authors = ["Jose Storopoli <jose@storopoli.io>, Rik Huijzer <t.h.huijzer@rug.nl>, and contributors"]
 version = "2.1.1"
 
 [deps]
