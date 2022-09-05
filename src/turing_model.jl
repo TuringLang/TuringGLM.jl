@@ -181,7 +181,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Normal})
         if isempty(intercept_ranef)
             μ = α .+ X * β
         else
-            τ ~ mad(y) * truncated(TDist(3), 0, Inf)
+            τ ~ mad(y) * truncated(TDist(3); lower=0)
             zⱼ ~ filldist(Normal(), n_gr)
             μ = α .+ τ .* getindex.((zⱼ,), idxs) .+ X * β
         end
@@ -223,7 +223,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{TDist})
         if isempty(intercept_ranef)
             μ = α .+ X * β
         else
-            τ ~ mad(y) * truncated(TDist(3), 0, Inf)
+            τ ~ mad(y) * truncated(TDist(3); lower=0)
             zⱼ ~ filldist(Normal(), n_gr)
             μ = α .+ τ .* getindex.((zⱼ,), idxs) .+ X * β
         end
@@ -263,7 +263,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Bernoulli})
         if isempty(intercept_ranef)
             μ = α .+ X * β
         else
-            τ ~ mad(y) * truncated(TDist(3), 0, Inf)
+            τ ~ mad(y) * truncated(TDist(3); lower=0)
             zⱼ ~ filldist(Normal(), n_gr)
             μ = α .+ τ .* getindex.((zⱼ,), idxs) .+ X * β
         end
@@ -301,7 +301,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Poisson})
         if isempty(intercept_ranef)
             μ = α .+ X * β
         else
-            τ ~ mad(y) * truncated(TDist(3), 0, Inf)
+            τ ~ mad(y) * truncated(TDist(3); lower=0)
             zⱼ ~ filldist(Normal(), n_gr)
             μ = α .+ τ .* getindex.((zⱼ,), idxs) .+ X * β
         end
@@ -341,7 +341,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{NegativeBinomial
         if isempty(intercept_ranef)
             μ = α .+ X * β
         else
-            τ ~ mad(y) * truncated(TDist(3), 0, Inf)
+            τ ~ mad(y) * truncated(TDist(3); lower=0)
             zⱼ ~ filldist(Normal(), n_gr)
             μ = α .+ τ .* getindex.((zⱼ,), idxs) .+ X * β
         end
