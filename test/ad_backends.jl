@@ -24,11 +24,9 @@
     @timed_testset "ReverseDiff" begin
         using ReverseDiff
         Turing.setadbackend(:reversediff)
-        Turing.setrdcache(true)
         chn = sample(m, NUTS(), 2)
         @assert chn isa Chains
     end
     # go back to defaults
-    Turing.setrdcache(false)
     Turing.setadbackend(:forwarddiff)
 end
