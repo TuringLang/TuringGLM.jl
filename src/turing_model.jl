@@ -180,7 +180,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Normal})
         σ ~ Exponential(residual)
         μ = α .+ X * β
         if !isempty(intercept_ranef)
-            τ ~ mad(y) * truncated(TDist(3), 0, Inf)
+            τ ~ mad(y) * truncated(TDist(3); lower=0)
             zⱼ ~ filldist(Normal(), n_gr)
             αⱼ = zⱼ .* τ
             μ .+= αⱼ[idxs]
@@ -222,7 +222,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{TDist})
         ν ~ prior.auxiliary
         μ = α .+ X * β
         if !isempty(intercept_ranef)
-            τ ~ 0 + mad(y) * truncated(TDist(3), 0, Inf)
+            τ ~ 0 + mad(y) * truncated(TDist(3); lower=0)
             zⱼ ~ filldist(Normal(), n_gr)
             αⱼ = zⱼ .* τ
             μ .+= αⱼ[idxs]
@@ -262,7 +262,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Bernoulli})
         β ~ filldist(prior.predictors, predictors)
         μ = α .+ X * β
         if !isempty(intercept_ranef)
-            τ ~ mad(y) * truncated(TDist(3), 0, Inf)
+            τ ~ mad(y) * truncated(TDist(3); lower=0)
             zⱼ ~ filldist(Normal(), n_gr)
             αⱼ = zⱼ .* τ
             μ .+= αⱼ[idxs]
@@ -300,7 +300,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Poisson})
         β ~ filldist(prior.predictors, predictors)
         μ = α .+ X * β
         if !isempty(intercept_ranef)
-            τ ~ mad(y) * truncated(TDist(3), 0, Inf)
+            τ ~ mad(y) * truncated(TDist(3); lower=0)
             zⱼ ~ filldist(Normal(), n_gr)
             αⱼ = zⱼ .* τ
             μ .+= αⱼ[idxs]
@@ -340,7 +340,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{NegativeBinomial
         ϕ = 1 / ϕ⁻
         μ = α .+ X * β
         if !isempty(intercept_ranef)
-            τ ~ mad(y) * truncated(TDist(3), 0, Inf)
+            τ ~ mad(y) * truncated(TDist(3); lower=0)
             zⱼ ~ filldist(Normal(), n_gr)
             αⱼ = zⱼ .* τ
             μ .+= αⱼ[idxs]
