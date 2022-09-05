@@ -137,10 +137,14 @@ end
 # Default priors
 _prior(prior::Prior, y, ::Type{<:UnivariateDistribution}) = prior
 function _prior(::DefaultPrior, y, ::Type{Normal})
-    return CustomPrior(TDist(3), median(y) + mad(y) * TDist(3), nothing)
+    m = median(y)
+    return CustomPrior(TDist(3), m + mad(y; center=m, normalize=true) * TDist(3), nothing)
 end
 function _prior(::DefaultPrior, y, ::Type{TDist})
-    return CustomPrior(TDist(3), median(y) + mad(y) * TDist(3), Gamma(2, 0.1))
+    m = median(y)
+    return CustomPrior(
+        TDist(3), m + mad(y; center=m, normalize=true) * TDist(3), Gamma(2, 0.1)
+    )
 end
 function _prior(::DefaultPrior, y, ::Type{Bernoulli})
     return CustomPrior(TDist(3), 2.5 * TDist(3), nothing)
@@ -174,13 +178,14 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Normal})
         σ_X=σ_X,
         prior=prior,
         residual=1 / std(y),
+        mad_y=mad(y; normalize=true),
     )
         α ~ prior.intercept
         β ~ filldist(prior.predictors, predictors)
         σ ~ Exponential(residual)
         μ = α .+ X * β
         if !isempty(intercept_ranef)
-            τ ~ mad(y) * truncated(TDist(3); lower=0)
+            τ ~ mad_y * truncated(TDist(3); lower=0)
             zⱼ ~ filldist(Normal(), n_gr)
             αⱼ = zⱼ .* τ
             μ .+= αⱼ[idxs]
@@ -215,6 +220,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{TDist})
         σ_X=σ_X,
         prior=prior,
         residual=1 / std(y),
+        mad_y=mad(y; normalize=true),
     )
         α ~ prior.intercept
         β ~ filldist(prior.predictors, predictors)
@@ -222,7 +228,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{TDist})
         ν ~ prior.auxiliary
         μ = α .+ X * β
         if !isempty(intercept_ranef)
-            τ ~ 0 + mad(y) * truncated(TDist(3); lower=0)
+            τ ~ mad_y * truncated(TDist(3); lower=0)
             zⱼ ~ filldist(Normal(), n_gr)
             αⱼ = zⱼ .* τ
             μ .+= αⱼ[idxs]
@@ -257,12 +263,13 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Bernoulli})
         μ_X=μ_X,
         σ_X=σ_X,
         prior=prior,
+        mad_y=mad(y; normalize=true),
     )
         α ~ prior.intercept
         β ~ filldist(prior.predictors, predictors)
         μ = α .+ X * β
         if !isempty(intercept_ranef)
-            τ ~ mad(y) * truncated(TDist(3); lower=0)
+            τ ~ mad_y * truncated(TDist(3); lower=0)
             zⱼ ~ filldist(Normal(), n_gr)
             αⱼ = zⱼ .* τ
             μ .+= αⱼ[idxs]
@@ -295,12 +302,13 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Poisson})
         μ_X=μ_X,
         σ_X=σ_X,
         prior=prior,
+        mad_y=mad(y; normalize=true),
     )
         α ~ prior.intercept
         β ~ filldist(prior.predictors, predictors)
         μ = α .+ X * β
         if !isempty(intercept_ranef)
-            τ ~ mad(y) * truncated(TDist(3); lower=0)
+            τ ~ mad_y * truncated(TDist(3); lower=0)
             zⱼ ~ filldist(Normal(), n_gr)
             αⱼ = zⱼ .* τ
             μ .+= αⱼ[idxs]
@@ -333,6 +341,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{NegativeBinomial
         μ_X=μ_X,
         σ_X=σ_X,
         prior=prior,
+        mad_y=mad(y; normalize=true),
     )
         α ~ prior.intercept
         β ~ filldist(prior.predictors, predictors)
@@ -340,7 +349,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{NegativeBinomial
         ϕ = 1 / ϕ⁻
         μ = α .+ X * β
         if !isempty(intercept_ranef)
-            τ ~ mad(y) * truncated(TDist(3); lower=0)
+            τ ~ mad_y * truncated(TDist(3); lower=0)
             zⱼ ~ filldist(Normal(), n_gr)
             αⱼ = zⱼ .* τ
             μ .+= αⱼ[idxs]
