@@ -1,7 +1,7 @@
 name = "TuringGLM"
 uuid = "0004c1f4-53c5-4d43-a221-a1dac6cf6b74"
 authors = ["Jose Storopoli <thestoropoli@gmail.com>, Rik Huijzer <t.h.huijzer@rug.nl>, and contributors"]
-version = "2.0.1"
+version = "2.1.0"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
@@ -19,7 +19,7 @@ Tables = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
 Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 
 [compat]
-Distributions = "0.25"
+Distributions = "0.25.42"
 GLM = "1.5"
 LazyArrays = "0.22"
 MixedModels = "4.5"
