@@ -45,7 +45,7 @@ The most popular ones are `DataFrame`s and `NamedTuple`s.
 
 ### Supported Models
 
-TuringGLM supports non-hiearchical and hierarchical models.
+TuringGLM supports non-hierarchical and hierarchical models.
 For hierarchical models, only single random-intercept hierarchical models are supported.
 
 Currently, for likelihoods `TuringGLM.jl` supports:
