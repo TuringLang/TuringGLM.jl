@@ -58,15 +58,7 @@ Currently, for likelihoods `TuringGLM.jl` supports:
 
 ## Tutorials
 
-Take a look at the tutorials for all supported likelihood and models:
-
-* [Linear Regression](tutorials/linear_regression)
-* [Logistic Regression](tutorials/logistic_regression)
-* [Poisson Regression](tutorials/poisson_regression)
-* [Negative Binomial Regression](tutorials/negativebinomial_regression)
-* [Robust Student-t Regression](tutorials/robust_regression)
-* [Hierarchical Models](tutorials/hierarchical_models)
-* [Custom Priors](tutorials/custom_prior)
+Take a look at the tutorials for all supported likelihood and models.
 
 ```@contents
 Pages = [
