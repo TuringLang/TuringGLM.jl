@@ -50,6 +50,7 @@ end
     include("utils.jl")
     include("priors.jl")
     include("turing_model.jl")
+    include("ad_backends.jl")
 end
 
 show(TIMEROUTPUT; compact=true, sortby=:firstexec)
