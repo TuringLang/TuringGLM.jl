@@ -3,7 +3,6 @@ uuid = "0004c1f4-53c5-4d43-a221-a1dac6cf6b74"
 authors = ["Jose Storopoli <jose@storopoli.io>, Rik Huijzer <t.h.huijzer@rug.nl>, and contributors"]
 version = "2.1.2"
 
-
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
@@ -29,5 +28,5 @@ StatsBase = "0.33"
 StatsModels = "0.6.28"
 TableOperations = "1.2"
 Tables = "1.6"
-Turing = "0.20, 0.21"
+Turing = "0.20, 0.21, 0.22"
 julia = "1.6"
