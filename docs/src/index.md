@@ -1,8 +1,11 @@
 # TuringGLM
 
-Documentation for [TuringGLM](https://github.com/TuringLang/TuringGLM.jl).
+Documentation for [`TuringGLM`](https://github.com/TuringLang/TuringGLM.jl).
 Please [file an issue](https://github.com/TuringLang/TuringGLM.jl/issues/new)
 if you run into any problems.
+
+`TuringGLM` supports Julia version 1.7+.
+We recommend always using it with the latest stable Julia release.
 
 ## Getting Started
 
