@@ -97,7 +97,11 @@ Returns `true` if any of the terms in `formula` is a `FunctionTerm` or false
 otherwise.
 """
 function has_ranef(formula::FormulaTerm)
-    return any(t -> t isa FunctionTerm{typeof(|)}, formula.rhs)
+    if formula.rhs isa StatsModels.Term
+        return false
+    else
+        return any(t -> t isa FunctionTerm{typeof(|)}, formula.rhs)
+    end
 end
 
 """
