@@ -219,7 +219,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{TDist})
         μ_X=μ_X,
         σ_X=σ_X,
         prior=prior,
-        residual=1 / std(y),
+        residual=std(y),
         mad_y=mad(y; normalize=true),
     )
         α ~ prior.intercept
@@ -240,7 +240,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{TDist})
 end
 function _model(μ_X, σ_X, prior, ::Type{TDist})
     @model function student_model(
-        y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=prior, residual=1 / std(y)
+        y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=prior, residual=std(y)
     )
         α ~ prior.intercept
         β ~ filldist(prior.predictors, predictors)
