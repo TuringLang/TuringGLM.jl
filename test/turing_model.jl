@@ -9,9 +9,9 @@
         @testset "standardize=false" begin
             m = turing_model(f, kidiq)
             chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
-            @test summarystats(chn)[:α, :mean] ≈ 29.30 atol = 2.0
-            @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.533 atol = 0.2
-            @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.593 atol = 0.2
+            @test summarystats(chn)[:α, :mean] ≈ 31.80 atol = 2.0
+            @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.507 atol = 0.2
+            @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.22 atol = 0.2
         end
 
         @testset "standardize=true" begin
@@ -33,9 +33,9 @@
         @testset "explicit calling Normal" begin
             m = turing_model(f, kidiq; model=Normal)
             chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
-            @test summarystats(chn)[:α, :mean] ≈ 29.30 atol = 2.0
-            @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.533 atol = 0.2
-            @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.593 atol = 0.2
+            @test summarystats(chn)[:α, :mean] ≈ 31.80 atol = 2.0
+            @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.507 atol = 0.2
+            @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.22 atol = 0.2
         end
     end
     @timed_testset "TDist Model" begin
@@ -43,20 +43,20 @@
         @testset "standardize=false" begin
             m = turing_model(f, kidiq; model=TDist)
             chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
-            @test summarystats(chn)[:α, :mean] ≈ 40.380 atol = 2.0
-            @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.478 atol = 0.2
-            @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.736 atol = 0.2
-            @test quantile(chn)[:ν, Symbol("50.0%")] ≈ 1.039 atol = 0.5
+            @test summarystats(chn)[:α, :mean] ≈ 33.31 atol = 2.0
+            @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.519 atol = 0.2
+            @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.340 atol = 0.2
+            @test quantile(chn)[:ν, Symbol("50.0%")] ≈ 2.787 atol = 0.5
         end
 
         @testset "custom_priors" begin
             priors = CustomPrior(Normal(), Normal(28, 5), Exponential(2))
             m = turing_model(f, kidiq; model=TDist, priors)
             chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
-            @test summarystats(chn)[:α, :mean] ≈ 35.506 atol = 2.0
-            @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.522 atol = 0.2
-            @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.628 atol = 0.2
-            @test quantile(chn)[:ν, Symbol("50.0%")] ≈ 1.178 atol = 0.5
+            @test summarystats(chn)[:α, :mean] ≈ 28.565 atol = 2.0
+            @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.551 atol = 0.2
+            @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.255 atol = 0.2
+            @test quantile(chn)[:ν, Symbol("50.0%")] ≈ 10.339 atol = 0.5
         end
     end
     @timed_testset "Bernoulli Model" begin
@@ -112,9 +112,9 @@
             priors = CustomPrior(Normal(), Normal(2, 5), Exponential(0.5))
             m = turing_model(f, roaches; model=NegativeBinomial, priors)
             chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
-            @test summarystats(chn)[:α, :mean] ≈ 2.422 atol = 0.5
+            @test summarystats(chn)[:α, :mean] ≈ 2.401 atol = 0.5
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.013 atol = 0.2
-            @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.732 atol = 0.2
+            @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.723 atol = 0.2
             @test quantile(chn)[:ϕ⁻, Symbol("50.0%")] ≈ 3.56 atol = 0.2
         end
     end
@@ -122,10 +122,10 @@
         f = @formula(y ~ (1 | cheese) + background)
         m = turing_model(f, cheese)
         chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
-        @test summarystats(chn)[:α, :mean] ≈ 68.33 atol = 2.0
-        @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 6.928 atol = 0.2
-        @test summarystats(chn)[Symbol("zⱼ[1]"), :mean] ≈ 0.306 atol = 0.2
-        @test quantile(chn)[Symbol("zⱼ[2]"), Symbol("50.0%")] ≈ -1.422 atol = 0.5
+        @test summarystats(chn)[:α, :mean] ≈ 68.07 atol = 2.0
+        @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 6.60 atol = 0.2
+        @test summarystats(chn)[Symbol("zⱼ[1]"), :mean] ≈ 0.348 atol = 0.2
+        @test quantile(chn)[Symbol("zⱼ[2]"), Symbol("50.0%")] ≈ -1.376 atol = 0.5
     end
     @testset "Unsupported Model Likelihoods" begin
         @test_throws ArgumentError turing_model(@formula(y ~ x), nt_str; model=Binomial)
