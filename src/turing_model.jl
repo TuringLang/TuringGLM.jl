@@ -177,7 +177,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Normal})
         μ_X=μ_X,
         σ_X=σ_X,
         prior=prior,
-        residual=1 / std(y),
+        residual=std(y),
         mad_y=mad(y; normalize=true),
     )
         α ~ prior.intercept
@@ -197,7 +197,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Normal})
 end
 function _model(μ_X, σ_X, prior, ::Type{Normal})
     @model function normal_model(
-        y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=prior, residual=1 / std(y)
+        y, X; predictors=size(X, 2), μ_X=μ_X, σ_X=σ_X, prior=prior, residual=std(y)
     )
         α ~ prior.intercept
         β ~ filldist(prior.predictors, predictors)
