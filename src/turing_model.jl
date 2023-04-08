@@ -263,14 +263,14 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Bernoulli})
         μ_X=μ_X,
         σ_X=σ_X,
         prior=prior,
-        mad_y=mad(y; normalize=true),
+        std_y=std(y; normalize=true),
     )
         α ~ prior.intercept
         β ~ filldist(prior.predictors, predictors)
         if isempty(intercept_ranef)
             μ = α .+ X * β
         else
-            τ ~ mad_y * truncated(TDist(3); lower=0)
+            τ ~ std_y * truncated(TDist(3); lower=0)
             zⱼ ~ filldist(Normal(), n_gr)
             μ = α .+ τ .* getindex.((zⱼ,), idxs) .+ X * β
         end
