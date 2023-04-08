@@ -10,9 +10,23 @@ on:
 
 jobs:
   format:
+    name: "Format Check"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - uses: domluna/JuliaFormatter-action@master
-      with:
-        args: -v .
+      - uses: actions/checkout@v3
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: 1
+      - name: Install JuliaFormatter and format
+        run: |
+          using Pkg
+          Pkg.add(PackageSpec(name="JuliaFormatter"))
+          using JuliaFormatter
+          format("."; verbose=true)
+        shell: julia --color=yes {0}
+      - name: Suggest formatting changes
+        uses: reviewdog/action-suggester@v1
+        if: github.event_name == 'pull_request'
+        with:
+          tool_name: JuliaFormatter
+          fail_on_error: true
