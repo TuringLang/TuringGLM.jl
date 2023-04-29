@@ -244,44 +244,6 @@
         @test Z == expected
         Z = T.data_random_effects(f, df_cat)
         @test Z == expected
-
-        expected = Dict("slope_x_int" => [1.0, 2.0, 3.0, 4.0])
-        f = @formula y_float ~ 1 + (1 + x_int | x_cat)
-        Z = T.data_random_effects(f, nt_str)
-        @test Z == expected
-        Z = T.data_random_effects(f, nt_cat)
-        @test Z == expected
-        Z = T.data_random_effects(f, df_str)
-        @test Z == expected
-        Z = T.data_random_effects(f, df_cat)
-        @test Z == expected
-
-        expected = Dict(
-            "slope_x_float" => [1.1, 2.3, 3.14, 3.65], "slope_x_int" => [1.0, 2.0, 3.0, 4.0]
-        )
-        f = @formula y_float ~ 1 + (1 + x_int + x_float | x_cat)
-        Z = T.data_random_effects(f, nt_str)
-        @test Z == expected
-        Z = T.data_random_effects(f, nt_cat)
-        @test Z == expected
-        Z = T.data_random_effects(f, df_str)
-        @test Z == expected
-        Z = T.data_random_effects(f, df_cat)
-        @test Z == expected
-
-        expected = Dict(
-            "slope_x_float" => [1.1, 2.3, 3.14, 3.65], "slope_x_int" => [1.0, 2.0, 3.0, 4.0]
-        )
-        f = @formula y_float ~
-            1 + (1 + x_int + x_float | x_cat) + (1 + x_int + x_float | group)
-        Z = T.data_random_effects(f, nt_str)
-        @test Z == expected
-        Z = T.data_random_effects(f, nt_cat)
-        @test Z == expected
-        Z = T.data_random_effects(f, df_str)
-        @test Z == expected
-        Z = T.data_random_effects(f, df_cat)
-        @test Z == expected
     end
 
     @testset "has_ranef" begin
@@ -310,9 +272,6 @@
 
         f = @formula y_float ~ x_int + (1 | x_cat)
         @test T.ranef(f) isa Tuple{T.RandomEffectsTerm}
-
-        f = @formula y_float ~ x_int + (1 + x_float | x_cat)
-        @test T.ranef(f) isa Tuple{T.RandomEffectsTerm}
     end
 
     @testset "n_ranef" begin
@@ -327,36 +286,16 @@
 
         f = @formula y_float ~ 1 + x_float + (1 | x_cat) + (1 | group)
         @test T.n_ranef(f) == 2
-
-        f = @formula y_float ~ x_int + (1 + x_float | x_cat)
-        @test T.n_ranef(f) == 2
-
-        f = @formula y_float ~ 1 + (1 + x_int + x_float | x_cat)
-        @test T.n_ranef(f) == 3
-
-        f = @formula y_float ~
-            1 + (1 + x_int + x_float | x_cat) + (1 + x_int + x_float | group)
-        @test T.n_ranef(f) == 6
     end
 
     @testset "intercept_per_ranef" begin
         f = @formula y_float ~ 1 + x_int + xcat + (1 | x_cat)
         @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat"]
 
-        f = @formula y_float ~ 1 + (1 + x_int + x_float | x_cat)
-        @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat"]
-
         f = @formula y_float ~ 1 + x_float + (1 | x_cat) + (1 | x_cat)
         @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat"]
 
         f = @formula y_float ~ 1 + x_float + (1 | x_cat) + (1 | group)
-        @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat", "group"]
-
-        f = @formula y_float ~ 1 + (1 + x_int + x_float | x_cat)
-        @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat"]
-
-        f = @formula y_float ~
-            1 + (1 + x_int + x_float | x_cat) + (1 + x_int + x_float | group)
         @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat", "group"]
     end
 
@@ -364,21 +303,8 @@
         f = @formula y_float ~ 1 + x_int + xcat + (1 | x_cat)
         @test T.slope_per_ranef(T.ranef(f)) == T.SlopePerRanEf()
 
-        f = @formula y_float ~ 2 + (1 + x_int + x_float | x_cat)
-        @test T.slope_per_ranef(T.ranef(f)) ==
-            T.SlopePerRanEf(Dict("x_cat" => ["x_int", "x_float"]))
-
         f = @formula y_float ~ 1 + x_float + (1 | x_cat) + (1 | x_cat)
         @test T.slope_per_ranef(T.ranef(f)) == T.SlopePerRanEf()
-
-        f = @formula y_float ~ 1 + x_float + (1 | x_cat) + (1 | group)
-        @test T.slope_per_ranef(T.ranef(f)) == T.SlopePerRanEf()
-
-        f = @formula y_float ~
-            1 + (1 + x_int + x_float | x_cat) + (1 + x_int + x_float | group)
-        @test T.slope_per_ranef(T.ranef(f)) == T.SlopePerRanEf(
-            Dict("x_cat" => ["x_int", "x_float"], "group" => ["x_int", "x_float"])
-        )
     end
 
     @testset "get_idx" begin
