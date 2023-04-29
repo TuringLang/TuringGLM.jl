@@ -114,7 +114,7 @@ function ranef(formula::FormulaTerm)
     if has_ranef(formula)
         terms = filter(t -> t isa FunctionTerm{typeof(|)}, formula.rhs)
         terms = map(terms) do t
-            lhs, rhs = first(t.args_parsed), last(t.args_parsed)
+            lhs, rhs = first(t.args), last(t.args)
             RandomEffectsTerm(lhs, rhs)
         end
         return terms
