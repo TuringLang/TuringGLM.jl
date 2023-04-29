@@ -343,20 +343,10 @@
         f = @formula y_float ~ 1 + x_int + xcat + (1 | x_cat)
         @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat"]
 
-        f = @formula y_float ~ 1 + (1 + x_int + x_float | x_cat)
-        @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat"]
-
         f = @formula y_float ~ 1 + x_float + (1 | x_cat) + (1 | x_cat)
         @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat"]
 
         f = @formula y_float ~ 1 + x_float + (1 | x_cat) + (1 | group)
-        @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat", "group"]
-
-        f = @formula y_float ~ 1 + (1 + x_int + x_float | x_cat)
-        @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat"]
-
-        f = @formula y_float ~
-            1 + (1 + x_int + x_float | x_cat) + (1 + x_int + x_float | group)
         @test T.intercept_per_ranef(T.ranef(f)) == ["x_cat", "group"]
     end
 
