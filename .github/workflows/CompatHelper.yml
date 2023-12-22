@@ -6,6 +6,13 @@ on:
 jobs:
   CompatHelper:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        subdir: [
+          {dir: "", compat: "KeepEntry()"},
+          {dir: "docs", compat: "DropEntry()"},
+          {dir: "test", compat: "DropEntry()"},
+          ]
     steps:
       - name: Pkg.add("CompatHelper")
         run: julia -e 'using Pkg; Pkg.add("CompatHelper")'
@@ -13,4 +20,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COMPATHELPER_PRIV: ${{ secrets.DOCUMENTER_KEY }}
-        run: julia -e 'using CompatHelper; CompatHelper.main()'
+        run: julia -e 'using CompatHelper; CompatHelper.main(; subdirs=["${{ matrix.subdir.dir }}"], entry_type=${{ matrix.subdir.compat }})'
