@@ -24,7 +24,6 @@ DocMeta.setdocmeta!(TuringGLM, :DocTestSetup, :(using TuringGLM); recursive=true
 makedocs(;
     modules=[TuringGLM],
     authors="Jose Storopoli <jose@storopoli.io>, Rik Huijzer <t.h.huijzer@rug.nl>, and contributors",
-    repo="https://github.com/TuringLang/TuringGLM.jl/blob/{commit}{path}#{line}",
     sitename="TuringGLM.jl",
     format=Documenter.HTML(;
         assets=["assets/favicon.ico"],
@@ -32,6 +31,8 @@ makedocs(;
         # Using MathJax3 since Pluto uses that engine too.
         mathengine=Documenter.MathJax3(),
         prettyurls=get(ENV, "CI", "false") == "true",
+        size_threshold=600 * 2^10, # 600 KiB
+        size_threshold_warn=200 * 2^10, # 200 KiB
     ),
     pages=["Home" => "index.md", "Tutorials" => T, "API reference" => "api.md"],
     linkcheck=true,
