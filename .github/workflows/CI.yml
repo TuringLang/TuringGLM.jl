@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - main
-    tags: "*"
+    tags: ["*"]
   pull_request:
   workflow_dispatch:
 concurrency:
@@ -29,7 +29,7 @@ jobs:
         arch:
           - x64
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
@@ -40,13 +40,13 @@ jobs:
         with:
           coverage: "false"
         env:
-          JULIA_NUM_THREADS: "2"
+          JULIA_NUM_THREADS: "auto"
   docs:
     name: Documentation
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v1
         with:
           version: 1
