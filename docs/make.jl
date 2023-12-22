@@ -34,6 +34,7 @@ makedocs(;
         prettyurls=get(ENV, "CI", "false") == "true",
     ),
     pages=["Home" => "index.md", "Tutorials" => T, "API reference" => "api.md"],
+    linkcheck=true,
 )
 
 deploydocs(; repo="github.com/TuringLang/TuringGLM.jl", devbranch="main")
