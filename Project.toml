@@ -1,7 +1,11 @@
 name = "TuringGLM"
 uuid = "0004c1f4-53c5-4d43-a221-a1dac6cf6b74"
-authors = ["Jose Storopoli <jose@storopoli.io>, Rik Huijzer <t.h.huijzer@rug.nl>, and contributors"]
-version = "2.8.1"
+authors = [
+    "Jose Storopoli <jose@storopoli.io>",
+    "Rik Huijzer <t.h.huijzer@rug.nl>",
+    "contributors",
+]
+version = "2.9.0"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
