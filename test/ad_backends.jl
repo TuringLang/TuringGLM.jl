@@ -5,30 +5,24 @@
     m = turing_model(f, cheese)
     # only running 2 samples to test if the different ADs runs
     @timed_testset "ForwardDiff" begin
-        Turing.setadbackend(:forwarddiff)
-        chn = sample(m, NUTS(), 2)
+        chn = sample(m, NUTS(; adtype=AutoForwardDiff(; chunksize=8)), 2)
         @test chn isa Chains
     end
     # TODO: fix Tracker tests
     # @timed_testset "Tracker" begin
     #     using Tracker
-    #     Turing.setadbackend(:tracker)
-    #     chn = sample(m, NUTS(), 2)
+    #     chn = sample(m, NUTS(; adtype=AutoTracker()), 2)
     #     @test chn isa Chains
     # end
     # TODO: fix Zygote tests
     # @timed_testset "Zygote" begin
     #     using Zygote
-    #     Turing.setadbackend(:zygote)
-    #     chn = sample(m, NUTS(), 2)
+    #     chn = sample(m, NUTS(; adtype=AutoZygote()), 2)
     #     @test chn isa Chains
     # end
     @timed_testset "ReverseDiff" begin
         using ReverseDiff
-        Turing.setadbackend(:reversediff)
-        chn = sample(m, NUTS(), 2)
+        chn = sample(m, NUTS(; adtype=AutoReverseDiff(; compile=true)), 2)
         @test chn isa Chains
     end
-    # go back to defaults
-    Turing.setadbackend(:forwarddiff)
 end
