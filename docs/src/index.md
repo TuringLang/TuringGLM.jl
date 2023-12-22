@@ -11,7 +11,7 @@ We recommend always using it with the latest stable Julia release.
 
 TuringGLM makes easy to specify Bayesian **G**eneralized **L**inear **M**odels using the formula syntax and returns an instantiated [Turing](https://github.com/TuringLang/Turing.jl) model.
 
-Heavily inspired by [brms](https://github.com/paul-buerkner/brms/) (uses RStan or CmdStanR) and [bambi](https://github.com/bambinos/bambi) (uses PyMC3).
+Heavily inspired by [brms](https://github.com/paul-buerkner/brms/) (uses RStan or CmdStanR) and [bambi](https://github.com/bambinos/bambi/) (uses PyMC3).
 
 ### `@formula`
 
