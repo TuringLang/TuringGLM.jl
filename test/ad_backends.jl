@@ -22,7 +22,7 @@
     # end
     @timed_testset "ReverseDiff" begin
         using ReverseDiff
-        chn = sample(m, NUTS(; adtype=AutoReverseDiff(; compile=true)), 2)
+        chn = sample(m, NUTS(; adtype=AutoReverseDiff(true)), 2)
         @test chn isa Chains
     end
 end
