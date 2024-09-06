@@ -1,7 +1,7 @@
 name = "TuringGLM"
 uuid = "0004c1f4-53c5-4d43-a221-a1dac6cf6b74"
 authors = ["Jose Storopoli <jose@storopoli.io>", "Rik Huijzer <t.h.huijzer@rug.nl>", "contributors"]
-version = "2.11.0"
+version = "2.12.0"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
@@ -21,13 +21,13 @@ Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 [compat]
 Distributions = "0.25.42"
 GLM = "1.5"
-LazyArrays = "0.22, 1, 2"
+LazyArrays = "0.22 - 2"
 MixedModels = "4.5"
 Reexport = "1.2"
 Statistics = "1.6"
-StatsBase = "0.33, 0.34"
-StatsModels = "0.6.28, 0.7"
+StatsBase = "0.33 - 34"
+StatsModels = "0.6.28 - 0.7"
 TableOperations = "1.2"
 Tables = "1.6"
-Turing = "0.20 - 0.27, 0.28, 0.29, 0.30, 0.31, 0.32, 0.33, 0.34"
+Turing = "0.20 - 0.34"
 julia = "1"
