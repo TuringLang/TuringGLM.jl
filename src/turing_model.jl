@@ -263,7 +263,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Bernoulli})
         μ_X=μ_X,
         σ_X=σ_X,
         prior=prior,
-        std_y=std(y; normalize=true),
+        std_y=std(y),
     )
         α ~ prior.intercept
         β ~ filldist(prior.predictors, predictors)
