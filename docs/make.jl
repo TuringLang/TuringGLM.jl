@@ -38,7 +38,5 @@ makedocs(;
     linkcheck=true,
 )
 
-deploydocs(; repo="github.com/TuringLang/TuringGLM.jl", devbranch="main")
-
 # Useful for local development.
 cd(pkgdir(TuringGLM))
