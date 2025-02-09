@@ -22,6 +22,7 @@ permissions:
 jobs:
   docs:
     runs-on: ubuntu-latest
+    timeout-minutes: 40
 
     steps:
       - name: Build and deploy Documenter.jl docs
