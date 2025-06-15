@@ -6,11 +6,12 @@ on:
     tags: ["*"]
   pull_request:
   workflow_dispatch:
+
+# Cancel existing tests on the same PR if a new commit is added to a pull request
 concurrency:
-  # Skip intermediate builds: always.
-  # Cancel intermediate builds: only if it is a pull request build.
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+
 jobs:
   test:
     name: Julia CI
