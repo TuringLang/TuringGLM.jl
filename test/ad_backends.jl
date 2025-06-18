@@ -1,6 +1,6 @@
-import ForwardDiff
-import ReverseDiff
-import Mooncake
+using ForwardDiff: ForwardDiff
+using ReverseDiff: ReverseDiff
+using Mooncake: Mooncake
 
 @timed_testset "ad_backends.jl" begin
     DATA_DIR = joinpath("..", "data")
