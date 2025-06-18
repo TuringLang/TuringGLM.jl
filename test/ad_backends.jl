@@ -10,7 +10,7 @@
         AutoReverseDiff(; compile=true),
         AutoMooncake(; config=nothing),
     ]
-    @testset for "$adtype" in ADTYPES
+    @testset "$adtype" for adtype in ADTYPES
         @test sample(m, NUTS(; adtype=adtype), 20) isa Chains
     end
 end
