@@ -1,3 +1,7 @@
+import ForwardDiff
+import ReverseDiff
+import Mooncake
+
 @timed_testset "ad_backends.jl" begin
     DATA_DIR = joinpath("..", "data")
     cheese = CSV.read(joinpath(DATA_DIR, "cheese.csv"), DataFrame)
