@@ -12,7 +12,7 @@ TimerOutputs = "a759f4b9-e2f1-59dc-863e-4aeb61b1ea8f"
 
 [compat]
 CSV = "0.10"
-CategoricalArrays = "0.10"
+CategoricalArrays = "1"
 DataFrames = "1"
 ForwardDiff = "0.10, 1"
 Mooncake = "0.4.122"
