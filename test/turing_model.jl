@@ -1,3 +1,5 @@
+using StableRNGs: StableRNG
+
 @timed_testset "turing_model" begin
     DATA_DIR = joinpath("..", "data")
     kidiq = CSV.read(joinpath(DATA_DIR, "kidiq.csv"), DataFrame)
@@ -8,7 +10,7 @@
         f = @formula(kid_score ~ mom_iq * mom_hs)
         @testset "standardize=false" begin
             m = turing_model(f, kidiq)
-            chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 31.80 atol = 2.0
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.507 atol = 0.2
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.22 atol = 0.2
@@ -16,7 +18,7 @@
 
         @testset "standardize=true" begin
             m = turing_model(f, kidiq; standardize=true)
-            chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 0.000 atol = 0.2
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.648 atol = 0.2
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.849 atol = 0.2
@@ -25,14 +27,14 @@
         @testset "custom_priors" begin
             priors = CustomPrior(Normal(), Normal(28, 5), nothing)
             m = turing_model(f, kidiq; priors)
-            chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 28.758 atol = 2.0
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.539 atol = 0.2
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.3863 atol = 0.2
         end
         @testset "explicit calling Normal" begin
             m = turing_model(f, kidiq; model=Normal)
-            chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 31.80 atol = 2.0
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.507 atol = 0.2
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.22 atol = 0.2
@@ -42,7 +44,7 @@
         f = @formula(kid_score ~ mom_iq * mom_hs)
         @testset "standardize=false" begin
             m = turing_model(f, kidiq; model=TDist)
-            chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 33.31 atol = 2.0
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.519 atol = 0.2
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.340 atol = 0.2
@@ -52,7 +54,7 @@
         @testset "custom_priors" begin
             priors = CustomPrior(Normal(), Normal(28, 5), Exponential(2))
             m = turing_model(f, kidiq; model=TDist, priors)
-            chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 28.565 atol = 2.0
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.551 atol = 0.2
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ 0.255 atol = 0.2
@@ -63,7 +65,7 @@
         f = @formula(switch ~ arsenic + dist + assoc + educ)
         @testset "standardize=false" begin
             m = turing_model(f, wells; model=Bernoulli)
-            chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ -0.153 atol = 0.2
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.467 atol = 0.2
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.009 atol = 0.2
@@ -72,7 +74,7 @@
         @testset "custom_priors" begin
             priors = CustomPrior(Normal(), Normal(), nothing)
             m = turing_model(f, wells; model=Bernoulli, priors)
-            chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ -0.155 atol = 0.2
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.468 atol = 0.2
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.009 atol = 0.2
@@ -82,7 +84,7 @@
         f = @formula(y ~ roach1 + treatment + senior + exposure2)
         @testset "standardize=false" begin
             m = turing_model(f, roaches; model=Poisson)
-            chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 2.969 atol = 0.5
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.006 atol = 0.2
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.5145 atol = 0.2
@@ -91,7 +93,7 @@
         @testset "custom_priors" begin
             priors = CustomPrior(Normal(2, 5), Normal(), nothing)
             m = turing_model(f, roaches; model=Poisson, priors)
-            chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 2.963 atol = 0.5
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.006 atol = 0.2
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.5145 atol = 0.2
@@ -101,7 +103,7 @@
         f = @formula(y ~ roach1 + treatment + senior + exposure2)
         @testset "standardize=false" begin
             m = turing_model(f, roaches; model=NegativeBinomial)
-            chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 2.448 atol = 0.5
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.013 atol = 0.2
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.734 atol = 0.2
@@ -111,7 +113,7 @@
         @testset "custom_priors" begin
             priors = CustomPrior(Normal(), Normal(2, 5), Exponential(0.5))
             m = turing_model(f, roaches; model=NegativeBinomial, priors)
-            chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, :mean] ≈ 2.401 atol = 0.5
             @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 0.013 atol = 0.2
             @test quantile(chn)[Symbol("β[2]"), Symbol("50.0%")] ≈ -0.723 atol = 0.2
@@ -121,7 +123,7 @@
     @timed_testset "Hierarchical Model" begin
         f = @formula(y ~ (1 | cheese) + background)
         m = turing_model(f, cheese)
-        chn = sample(seed!(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+        chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
         @test summarystats(chn)[:α, :mean] ≈ 68.07 atol = 2.0
         @test summarystats(chn)[Symbol("β[1]"), :mean] ≈ 6.60 atol = 0.2
         @test summarystats(chn)[Symbol("zⱼ[1]"), :mean] ≈ 0.348 atol = 0.2
