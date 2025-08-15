@@ -6,7 +6,6 @@ using CategoricalArrays: CategoricalValue
 using CategoricalArrays: categorical, levels
 using Statistics: mean, std
 using TimerOutputs: TimerOutputs, @timeit
-using Random: seed!
 
 const T = TuringGLM
 
