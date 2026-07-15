@@ -5,6 +5,7 @@ version = "2.14.2"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+FlexiChains = "4a37a8b9-6e57-4b92-8664-298d46e639f7"
 LazyArrays = "5078a376-72f3-5289-bfd5-ec5146d43c02"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MixedModels = "ff71e718-51f3-5ec2-a782-8ffcbfa3c316"
@@ -19,6 +20,7 @@ Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 
 [compat]
 Distributions = "0.25.42"
+FlexiChains = "0.6"
 LazyArrays = "0.22, 1, 2"
 MixedModels = "4.5, 5"
 Reexport = "1.2"

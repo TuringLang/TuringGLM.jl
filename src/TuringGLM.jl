@@ -36,6 +36,7 @@ using Reexport: @reexport
         Normal,
         Poisson,
         TDist
+    using FlexiChains: At, VNChain, SymChain, summarystats, quantile
 end
 
 include("utils.jl")
