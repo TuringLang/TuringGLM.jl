@@ -1,43 +1,54 @@
 using CairoMakie
+using FlexiChains
 using TuringGLM
 
 function plot_chains(chns)
-    params = names(chns, :parameters)
+    param_keys = filter(k -> k isa FlexiChains.Parameter, collect(keys(chns)))
 
-    n_chains = length(chains(chns))
-    n_samples = length(chns)
+    names_and_values = Pair{String,Matrix{Float64}}[]
+    for k in param_keys
+        name = string(FlexiChains.get_name(k))
+        data = getindex(chns, k)
+        if eltype(parent(data)) <: AbstractVector
+            stacked = getindex(chns, k; stack=true)
+            for j in axes(stacked, 3)
+                push!(names_and_values, "$name[$j]" => Array(stacked[:, :, j]))
+            end
+        else
+            push!(names_and_values, name => Array(data))
+        end
+    end
+
+    n_chains = FlexiChains.nchains(chns)
+    n_samples = FlexiChains.niters(chns)
 
     fig = Figure(; resolution=(1_000, 800))
 
-    for (i, param) in enumerate(params)
-        ax = Axis(fig[i, 1]; ylabel=string(param))
+    for (i, (name, values)) in enumerate(names_and_values)
+        ax = Axis(fig[i, 1]; ylabel=name)
         for chain in 1:n_chains
-            values = chns[:, param, chain]
-            lines!(ax, 1:n_samples, values; label=string(chain))
+            lines!(ax, 1:n_samples, values[:, chain]; label=string(chain))
         end
 
         hideydecorations!(ax; label=false)
-        if i < length(params)
+        if i < length(names_and_values)
             hidexdecorations!(ax; grid=false)
         else
             ax.xlabel = "Iteration"
         end
     end
 
-    for (i, param) in enumerate(params)
-        ax = Axis(fig[i, 2]; ylabel=string(param))
+    for (i, (name, values)) in enumerate(names_and_values)
+        ax = Axis(fig[i, 2]; ylabel=name)
         for chain in 1:n_chains
-            values = chns[:, param, chain]
-            density!(ax, values; label=string(chain))
+            density!(ax, values[:, chain]; label=string(chain))
         end
 
         hideydecorations!(ax)
-        if i == length(params)
+        if i == length(names_and_values)
             ax.xlabel = "Parameter estimate"
         end
     end
-
-    axes = [only(contents(fig[i, 2])) for i in 1:length(params)]
 
     return fig
 end
