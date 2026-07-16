@@ -1,5 +1,12 @@
 using StableRNGs: StableRNG
 
+# The roaches data has a large unstandardised predictor, so in the Poisson and
+# NegativeBinomial models one NUTS chain's step-size search can collapse toward zero and
+# then spend every iteration at the maximum tree depth. That does not change the recovered
+# posteriors but makes sampling far slower, enough to time out the Julia lts CI job. Capping
+# the tree depth bounds that pathological case while leaving the well-behaved models alone.
+const TEST_NUTS = NUTS(; max_depth=8)
+
 @timed_testset "turing_model" begin
     DATA_DIR = joinpath("..", "data")
     kidiq = CSV.read(joinpath(DATA_DIR, "kidiq.csv"), DataFrame)
@@ -10,7 +17,7 @@ using StableRNGs: StableRNG
         f = @formula(kid_score ~ mom_iq * mom_hs)
         @testset "standardize=false" begin
             m = turing_model(f, kidiq)
-            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, TEST_NUTS, MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, stat=At(:mean)] ≈ 31.80 atol = 2.0
             @test summarystats(chn)[Symbol("β[1]"), stat=At(:mean)] ≈ 0.507 atol = 0.2
             @test quantile(chn, 0.5)[Symbol("β[2]")] ≈ 0.22 atol = 0.2
@@ -18,7 +25,7 @@ using StableRNGs: StableRNG
 
         @testset "standardize=true" begin
             m = turing_model(f, kidiq; standardize=true)
-            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, TEST_NUTS, MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, stat=At(:mean)] ≈ 0.000 atol = 0.2
             @test summarystats(chn)[Symbol("β[1]"), stat=At(:mean)] ≈ 0.648 atol = 0.2
             @test quantile(chn, 0.5)[Symbol("β[2]")] ≈ 0.849 atol = 0.2
@@ -27,14 +34,14 @@ using StableRNGs: StableRNG
         @testset "custom_priors" begin
             priors = CustomPrior(Normal(), Normal(28, 5), nothing)
             m = turing_model(f, kidiq; priors)
-            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, TEST_NUTS, MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, stat=At(:mean)] ≈ 28.758 atol = 2.0
             @test summarystats(chn)[Symbol("β[1]"), stat=At(:mean)] ≈ 0.539 atol = 0.2
             @test quantile(chn, 0.5)[Symbol("β[2]")] ≈ 0.3863 atol = 0.2
         end
         @testset "explicit calling Normal" begin
             m = turing_model(f, kidiq; model=Normal)
-            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, TEST_NUTS, MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, stat=At(:mean)] ≈ 31.80 atol = 2.0
             @test summarystats(chn)[Symbol("β[1]"), stat=At(:mean)] ≈ 0.507 atol = 0.2
             @test quantile(chn, 0.5)[Symbol("β[2]")] ≈ 0.22 atol = 0.2
@@ -44,7 +51,7 @@ using StableRNGs: StableRNG
         f = @formula(kid_score ~ mom_iq * mom_hs)
         @testset "standardize=false" begin
             m = turing_model(f, kidiq; model=TDist)
-            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, TEST_NUTS, MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, stat=At(:mean)] ≈ 33.31 atol = 2.0
             @test summarystats(chn)[Symbol("β[1]"), stat=At(:mean)] ≈ 0.519 atol = 0.2
             @test quantile(chn, 0.5)[Symbol("β[2]")] ≈ 0.340 atol = 0.2
@@ -54,7 +61,7 @@ using StableRNGs: StableRNG
         @testset "custom_priors" begin
             priors = CustomPrior(Normal(), Normal(28, 5), Exponential(2))
             m = turing_model(f, kidiq; model=TDist, priors)
-            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, TEST_NUTS, MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, stat=At(:mean)] ≈ 28.565 atol = 2.0
             @test summarystats(chn)[Symbol("β[1]"), stat=At(:mean)] ≈ 0.551 atol = 0.2
             @test quantile(chn, 0.5)[Symbol("β[2]")] ≈ 0.255 atol = 0.2
@@ -65,7 +72,7 @@ using StableRNGs: StableRNG
         f = @formula(switch ~ arsenic + dist + assoc + educ)
         @testset "standardize=false" begin
             m = turing_model(f, wells; model=Bernoulli)
-            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, TEST_NUTS, MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, stat=At(:mean)] ≈ -0.153 atol = 0.2
             @test summarystats(chn)[Symbol("β[1]"), stat=At(:mean)] ≈ 0.467 atol = 0.2
             @test quantile(chn, 0.5)[Symbol("β[2]")] ≈ -0.009 atol = 0.2
@@ -74,7 +81,7 @@ using StableRNGs: StableRNG
         @testset "custom_priors" begin
             priors = CustomPrior(Normal(), Normal(), nothing)
             m = turing_model(f, wells; model=Bernoulli, priors)
-            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, TEST_NUTS, MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, stat=At(:mean)] ≈ -0.155 atol = 0.2
             @test summarystats(chn)[Symbol("β[1]"), stat=At(:mean)] ≈ 0.468 atol = 0.2
             @test quantile(chn, 0.5)[Symbol("β[2]")] ≈ -0.009 atol = 0.2
@@ -85,7 +92,7 @@ using StableRNGs: StableRNG
         @testset "standardize=false" begin
             m = turing_model(f, roaches; model=Poisson)
             # seeds 123/124 give bad results with current Turing/AdvancedHMC
-            chn = sample(StableRNG(42), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(42), m, TEST_NUTS, MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, stat=At(:mean)] ≈ 2.969 atol = 0.5
             @test summarystats(chn)[Symbol("β[1]"), stat=At(:mean)] ≈ 0.006 atol = 0.2
             @test quantile(chn, 0.5)[Symbol("β[2]")] ≈ -0.5145 atol = 0.2
@@ -94,7 +101,7 @@ using StableRNGs: StableRNG
         @testset "custom_priors" begin
             priors = CustomPrior(Normal(2, 5), Normal(), nothing)
             m = turing_model(f, roaches; model=Poisson, priors)
-            chn = sample(StableRNG(42), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(42), m, TEST_NUTS, MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, stat=At(:mean)] ≈ 2.963 atol = 0.5
             @test summarystats(chn)[Symbol("β[1]"), stat=At(:mean)] ≈ 0.006 atol = 0.2
             @test quantile(chn, 0.5)[Symbol("β[2]")] ≈ -0.5145 atol = 0.2
@@ -104,7 +111,7 @@ using StableRNGs: StableRNG
         f = @formula(y ~ roach1 + treatment + senior + exposure2)
         @testset "standardize=false" begin
             m = turing_model(f, roaches; model=NegativeBinomial)
-            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, TEST_NUTS, MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, stat=At(:mean)] ≈ 2.448 atol = 0.5
             @test summarystats(chn)[Symbol("β[1]"), stat=At(:mean)] ≈ 0.013 atol = 0.2
             @test quantile(chn, 0.5)[Symbol("β[2]")] ≈ -0.734 atol = 0.2
@@ -114,7 +121,7 @@ using StableRNGs: StableRNG
         @testset "custom_priors" begin
             priors = CustomPrior(Normal(), Normal(2, 5), Exponential(0.5))
             m = turing_model(f, roaches; model=NegativeBinomial, priors)
-            chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+            chn = sample(StableRNG(123), m, TEST_NUTS, MCMCThreads(), 2_000, 2)
             @test summarystats(chn)[:α, stat=At(:mean)] ≈ 2.401 atol = 0.5
             @test summarystats(chn)[Symbol("β[1]"), stat=At(:mean)] ≈ 0.013 atol = 0.2
             @test quantile(chn, 0.5)[Symbol("β[2]")] ≈ -0.723 atol = 0.2
@@ -124,7 +131,7 @@ using StableRNGs: StableRNG
     @timed_testset "Hierarchical Model" begin
         f = @formula(y ~ (1 | cheese) + background)
         m = turing_model(f, cheese)
-        chn = sample(StableRNG(123), m, NUTS(), MCMCThreads(), 2_000, 2)
+        chn = sample(StableRNG(123), m, TEST_NUTS, MCMCThreads(), 2_000, 2)
         @test summarystats(chn)[:α, stat=At(:mean)] ≈ 68.07 atol = 2.0
         @test summarystats(chn)[Symbol("β[1]"), stat=At(:mean)] ≈ 6.60 atol = 0.2
         @test summarystats(chn)[Symbol("zⱼ[1]"), stat=At(:mean)] ≈ 0.348 atol = 0.2
