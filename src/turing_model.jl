@@ -234,7 +234,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{TDist})
             μ = α .+ τ .* getindex.((zⱼ,), idxs) .+ X * β
         end
         #TODO: implement random-effects slope
-        y ~ product_distribution(μ + σ * TDist.(ν))
+        y ~ product_distribution(μ .+ σ .* TDist.(ν))
         return nothing
     end
 end
