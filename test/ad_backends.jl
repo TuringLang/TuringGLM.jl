@@ -15,6 +15,6 @@ using Mooncake: Mooncake
         AutoMooncake(; config=nothing),
     ]
     @testset "$adtype" for adtype in ADTYPES
-        @test sample(m, NUTS(; adtype=adtype), 20) isa Chains
+        @test sample(m, NUTS(; adtype=adtype), 20) isa VNChain
     end
 end
