@@ -2,12 +2,12 @@
 
 ## Breaking changes
 
-TuringGLM now uses [FlexiChains](https://github.com/penelopeysm/FlexiChains.jl) for sampling output, following Turing v0.45's switch away from MCMCChains.
+Sampling now returns a [FlexiChains](https://github.com/penelopeysm/FlexiChains.jl) chain instead of an `MCMCChains.Chains`, following Turing 0.45. Post-processing that relied on MCMCChains indexing, such as `names(chn, :parameters)` or `chn[:, :param, :]`, needs to move to the FlexiChains API.
 
-Sampling a model returned by `turing_model` now produces a FlexiChains chain rather than an `MCMCChains.Chains`. Post-processing that indexed the old chain type (for example `names(chn, :parameters)` or `chn[:, :param, :]`) needs to move to the FlexiChains API.
+MCMCChains still works if you load it yourself and pass `chain_type=MCMCChains.Chains` to `sample`. It is no longer a dependency, so you can no longer get it by importing TuringGLM.
 
-MCMCChains is still supported. Load it yourself and pass `chain_type=MCMCChains.Chains` to `sample`. It is no longer a dependency, so importing it through TuringGLM or Turing no longer works.
+`At`, `VNChain`, `SymChain`, `summarystats`, and `quantile` are re-exported from FlexiChains.
 
-`summarystats` and `quantile`, along with the FlexiChains helpers `At`, `VNChain`, and `SymChain`, are now re-exported from FlexiChains.
+## Other changes
 
-The minimum supported Turing version is now 0.45, with the compat range set to `0.45 - 0.46`.
+The likelihoods use `product_distribution` rather than `arraydist`, which routed through the deprecated `Distributions.Product` constructor and so called `Base.depwarn` on every evaluation. Same distribution type, same results.
