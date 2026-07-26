@@ -11,3 +11,5 @@ MCMCChains still works if you load it yourself and pass `chain_type=MCMCChains.C
 ## Other changes
 
 The likelihoods use `product_distribution` rather than `arraydist`, which routed through the deprecated `Distributions.Product` constructor and so called `Base.depwarn` on every evaluation. Same distribution type, same results.
+
+Fixed the Student-t model with a random-effects intercept, which threw a `MethodError` instead of sampling.
