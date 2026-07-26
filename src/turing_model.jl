@@ -234,7 +234,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{TDist})
             μ = α .+ τ .* getindex.((zⱼ,), idxs) .+ X * β
         end
         #TODO: implement random-effects slope
-        y ~ arraydist(μ + σ * TDist.(ν))
+        y ~ product_distribution(μ + σ * TDist.(ν))
         return nothing
     end
 end
@@ -246,7 +246,7 @@ function _model(μ_X, σ_X, prior, ::Type{TDist})
         β ~ filldist(prior.predictors, predictors)
         σ ~ Exponential(residual)
         ν ~ prior.auxiliary
-        y ~ arraydist((α .+ X * β) .+ σ .* TDist.(ν))
+        y ~ product_distribution((α .+ X * β) .+ σ .* TDist.(ν))
         return nothing
     end
 end
@@ -275,7 +275,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Bernoulli})
             μ = α .+ τ .* getindex.((zⱼ,), idxs) .+ X * β
         end
         #TODO: implement random-effects slope
-        y ~ arraydist(LazyArray(@~ BernoulliLogit.(μ)))
+        y ~ product_distribution(LazyArray(@~ BernoulliLogit.(μ)))
         return nothing
     end
 end
@@ -285,7 +285,7 @@ function _model(μ_X, σ_X, prior, ::Type{Bernoulli})
     )
         α ~ prior.intercept
         β ~ filldist(prior.predictors, predictors)
-        y ~ arraydist(LazyArray(@~ BernoulliLogit.(α .+ X * β)))
+        y ~ product_distribution(LazyArray(@~ BernoulliLogit.(α .+ X * β)))
         return nothing
     end
 end
@@ -314,7 +314,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{Poisson})
             μ = α .+ τ .* getindex.((zⱼ,), idxs) .+ X * β
         end
         #TODO: implement random-effects slope
-        y ~ arraydist(LazyArray(@~ LogPoisson.(μ)))
+        y ~ product_distribution(LazyArray(@~ LogPoisson.(μ)))
         return nothing
     end
 end
@@ -324,7 +324,7 @@ function _model(μ_X, σ_X, prior, ::Type{Poisson})
     )
         α ~ prior.intercept
         β ~ filldist(prior.predictors, predictors)
-        y ~ arraydist(LazyArray(@~ LogPoisson.(α .+ X * β)))
+        y ~ product_distribution(LazyArray(@~ LogPoisson.(α .+ X * β)))
         return nothing
     end
 end
@@ -355,7 +355,7 @@ function _model(μ_X, σ_X, prior, intercept_ranef, idx, ::Type{NegativeBinomial
             μ = α .+ τ .* getindex.((zⱼ,), idxs) .+ X * β
         end
         #TODO: implement random-effects slope
-        y ~ arraydist(LazyArray(@~ NegativeBinomial2.(exp.(μ), ϕ)))
+        y ~ product_distribution(LazyArray(@~ NegativeBinomial2.(exp.(μ), ϕ)))
         return nothing
     end
 end
@@ -365,7 +365,7 @@ function _model(μ_X, σ_X, prior, ::Type{NegativeBinomial})
         β ~ filldist(prior.predictors, predictors)
         ϕ⁻ ~ prior.auxiliary
         ϕ = 1 / ϕ⁻
-        y ~ arraydist(LazyArray(@~ NegativeBinomial2.(exp.(α .+ X * β), ϕ)))
+        y ~ product_distribution(LazyArray(@~ NegativeBinomial2.(exp.(α .+ X * β), ϕ)))
         return nothing
     end
 end
