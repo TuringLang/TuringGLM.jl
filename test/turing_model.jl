@@ -138,6 +138,28 @@ const TEST_NUTS = NUTS(; max_depth=8)
         @test summarystats(chn)[Symbol("zⱼ[1]"), stat=At(:mean)] ≈ 0.348 atol = 0.2
         @test quantile(chn, 0.5)[Symbol("zⱼ[2]")] ≈ -1.376 atol = 0.5
     end
+    # Only the Gaussian likelihood had a hierarchical test, so the random-effects variants of
+    # the other likelihoods were never run. These check the group-level terms come through for
+    # each one, on a small derived dataset to keep them cheap.
+    @timed_testset "Hierarchical Model other likelihoods" begin
+        hier = DataFrame(; g=cheese.cheese, x=cheese.background, y=float.(cheese.y))
+        hier.y_bin = hier.y .> mean(hier.y)
+        hier.y_count = round.(Int, hier.y ./ 10)
+        for (name, f, model) in (
+            ("TDist", @formula(y ~ (1 | g) + x), TDist),
+            ("Bernoulli", @formula(y_bin ~ (1 | g) + x), Bernoulli),
+            ("Poisson", @formula(y_count ~ (1 | g) + x), Poisson),
+            ("NegativeBinomial", @formula(y_count ~ (1 | g) + x), NegativeBinomial),
+        )
+            @testset "$name" begin
+                m = turing_model(f, hier; model)
+                chn = sample(StableRNG(123), m, TEST_NUTS, 200)
+                @test isfinite(summarystats(chn)[:α, stat=At(:mean)])
+                @test isfinite(summarystats(chn)[:τ, stat=At(:mean)])
+                @test isfinite(summarystats(chn)[Symbol("zⱼ[1]"), stat=At(:mean)])
+            end
+        end
+    end
     @testset "Unsupported Model Likelihoods" begin
         @test_throws ArgumentError turing_model(@formula(y ~ x), nt_str; model=Binomial)
     end
